@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.21)
 
 # Change this to the name of your plugin
 # This cannot have spaces (but PRODUCT_NAME can)
-set(PROJECT_NAME "Pamplejuce")
+set(PROJECT_NAME "AutoWah")
 
 # Set the plugin formats you'll be building here.
 # Valid formats: AAX Unity VST AU AUv3 Standalone
@@ -62,18 +62,18 @@ juce_add_plugin("${PROJECT_NAME}"
 target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_20)
 
 # Manually list all .h and .cpp files for the plugin
-set(SourceFiles
-    Source/PluginEditor.h
-    Source/PluginProcessor.h
-    Source/PluginEditor.cpp
-    Source/PluginProcessor.cpp)
-target_sources("${PROJECT_NAME}" PRIVATE ${SourceFiles})
+set(SOURCE_FILES
+    source/PluginEditor.h
+    source/PluginProcessor.h
+    source/PluginEditor.cpp
+    source/PluginProcessor.cpp)
+target_sources("${PROJECT_NAME}" PRIVATE ${SOURCE_FILES})
 
 # No, we don't want our source buried in extra nested folders
 set_target_properties("${PROJECT_NAME}" PROPERTIES FOLDER "")
 
 # The Xcode source tree should uhhh, still look like the source tree, yo
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source PREFIX "" FILES ${SourceFiles})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/source PREFIX "" FILES ${SOURCE_FILES})
 
 # Setup our binary data as a target
 juce_add_binary_data(Assets SOURCES pamplejuce.png)
@@ -127,13 +127,13 @@ target_link_libraries("${PROJECT_NAME}"
 # Required for ctest (which is just easier for cross-platform CI)
 # include(CTest) does this too, but adds tons of targets we don't want
 # See: https://github.com/catchorg/Catch2/issues/2026
-# You could forgo ctest and call ./Tests directly from the build dir
+# You could forgo ctest and call ./tests directly from the build dir
 enable_testing()
 
 # "GLOBS ARE BAD" is brittle and silly UX, sorry CMake!
 # CONFIGURE_DEPENDS / Clion's CMake integration makes globbing absolutely fine
-file(GLOB_RECURSE TestFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*.h")
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
+file(GLOB_RECURSE TestFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h")
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/tests PREFIX "" FILES ${TestFiles})
 
 # Use Catch2 v3 on the devel branch
 Include(FetchContent)
@@ -146,24 +146,24 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2) # find_package equivalent
 
 # Setup the test executable, again C++ 20 please
-add_executable(Tests ${TestFiles})
-target_compile_features(Tests PRIVATE cxx_std_20)
+add_executable(tests ${TestFiles})
+target_compile_features(tests PRIVATE cxx_std_20)
 
 # Our test executable also wants to know about our plugin code...
-target_include_directories(Tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
-target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain "${PROJECT_NAME}" ${JUCE_DEPENDENCIES})
+target_include_directories(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/source)
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain "${PROJECT_NAME}" ${JUCE_DEPENDENCIES})
 
 # Make an Xcode Scheme for the test executable so we can run tests in the IDE
-set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
+set_target_properties(tests PROPERTIES XCODE_GENERATE_SCHEME ON)
 
-# Organize the test source in the Tests/ folder in the IDE
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
+# Organize the test source in the tests/ folder in the IDE
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/tests PREFIX "" FILES ${TestFiles})
 
 # Load and use the .cmake file provided by Catch2
 # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
 # We have to manually provide the source directory here for now
 include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
-catch_discover_tests(Tests)
+catch_discover_tests(tests)
 
 # Color our warnings and errors
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")

@@ -51,7 +51,7 @@ After you've created a new repo:
 
 ## Conventions
 
-1. Your tests will be in "Tests" and you can just add new .cpp files there.
+1. Your tests will be in "tests" and you can just add new .cpp files there.
 2. Your binary data target is called "Assets"
 
 ## Releases
@@ -126,7 +126,7 @@ It can be confusing, as the documentation is a big fragmented.
 * [Matt Clarkson's CMakeCatch2 repo](https://github.com/MattClarkson/CMakeCatch2)
 * [CMake Cookbook example](https://github.com/dev-cafe/cmake-cookbook/tree/master/chapter-04/recipe-02/cxx-example)
 * [Unit Testing With CTest](https://bertvandenbroucke.netlify.app/2019/12/12/unit-testing-with-ctest/)
-* [Mark's Catch2 examples from his 2020 ADC talk](https://github.com/Sinecure-Audio/TestsTalk)
+* [Mark's Catch2 examples from his 2020 ADC talk](https://github.com/Sinecure-Audio/testsTalk)
 
 ### Packaging, Code Signing and Notarization 
 
