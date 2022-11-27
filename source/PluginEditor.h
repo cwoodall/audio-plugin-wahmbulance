@@ -17,7 +17,7 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     AutoWahProcessor& processorRef;
-    juce::Slider gainSlider { Slider::RotaryVerticalDrag, Slider::TextBoxBelow };
+    juce::Slider gainSlider { juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow };
     juce::Label gainLabel;
     juce::SliderParameterAttachment gainAttachment;
 
