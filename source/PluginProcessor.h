@@ -1,6 +1,7 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
+#include "LowpassFilter.h"
 
 class AutoWahProcessor : public juce::AudioProcessor {
 public:
@@ -35,7 +36,9 @@ public:
 
 private:
     juce::AudioParameterFloat *gain;
+    juce::AudioParameterFloat *lpf_cutoff_Hz;
 
+    LowpassFilter lpf;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutoWahProcessor)
     
     friend class AutoWahProcessorEditor;

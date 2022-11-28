@@ -21,5 +21,9 @@ private:
     juce::Label gainLabel;
     juce::SliderParameterAttachment gainAttachment;
 
+    juce::Slider lpfSlider { juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow };
+    juce::Label lpfLabel;
+    juce::SliderParameterAttachment lpfAttachment;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutoWahProcessorEditor)
 };

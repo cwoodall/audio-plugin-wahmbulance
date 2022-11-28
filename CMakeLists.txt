@@ -45,8 +45,8 @@ juce_add_plugin("${PROJECT_NAME}"
     # VERSION ...                               # Set this if the plugin version is different to the project version
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
     # ICON_SMALL ...
-    COMPANY_NAME Pamplejuce
-    BUNDLE_ID com.pamplejuce.pamplejuce
+    COMPANY_NAME cwoodall
+    BUNDLE_ID com.cwoodall.a
     # IS_SYNTH TRUE/FALSE                       # Is this a synth or an effect?
     # NEEDS_MIDI_INPUT TRUE/FALSE               # Does the plugin need midi input?
     # NEEDS_MIDI_OUTPUT TRUE/FALSE              # Does the plugin need midi output?
@@ -62,11 +62,7 @@ juce_add_plugin("${PROJECT_NAME}"
 target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_20)
 
 # Manually list all .h and .cpp files for the plugin
-set(SOURCE_FILES
-    source/PluginEditor.h
-    source/PluginProcessor.h
-    source/PluginEditor.cpp
-    source/PluginProcessor.cpp)
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/source/*.h")
 target_sources("${PROJECT_NAME}" PRIVATE ${SOURCE_FILES})
 
 # No, we don't want our source buried in extra nested folders

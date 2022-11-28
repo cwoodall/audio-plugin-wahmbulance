@@ -12,6 +12,7 @@ AutoWahProcessor::AutoWahProcessor()
 #endif
     ) {
     addParameter(gain = new juce::AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f)); // [2]
+    addParameter(lpf_cutoff_Hz = new juce::AudioParameterFloat("filter_cutoff", "Filter Cutoff", 0.0f, 10000.0f, 100.0f)); // [2]
 }
 
 AutoWahProcessor::~AutoWahProcessor() {
@@ -76,7 +77,7 @@ void AutoWahProcessor::changeProgramName(int index, const juce::String &newName)
 void AutoWahProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    juce::ignoreUnused(sampleRate, samplesPerBlock);
+    lpf.setSamplingRate(static_cast<float>(sampleRate));
 }
 
 void AutoWahProcessor::releaseResources() {
@@ -122,20 +123,19 @@ void AutoWahProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i) {
         buffer.clear(i, 0, buffer.getNumSamples());
     }
-    auto gain_copy = this->gain->get();
+    auto gain_copy = gain->get();
+    auto lpf_cutoff_copy = lpf_cutoff_Hz->get();
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel) {
-        auto *channelData = buffer.getWritePointer(channel);
-        for (auto j = 0; j < buffer.getNumSamples(); ++j) {
-            channelData[j] = channelData[j] * gain_copy;
+    lpf.setCutoffFrequency(lpf_cutoff_copy);
+    lpf.processBlock(buffer, midiMessages);
+
+    for (auto channel = 0; channel < buffer.getNumChannels(); channel++) {
+        // to access the sample in the channel as a C-style array
+        auto channelSamples = buffer.getWritePointer(channel);
+        for (auto i = 0; i < buffer.getNumSamples(); i++) {
+            const auto inputSample = channelSamples[i];
+            channelSamples[i] = inputSample * gain_copy;
         }
-        // ..do something to the data...
     }
 }
 

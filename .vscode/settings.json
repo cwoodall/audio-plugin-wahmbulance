@@ -8,6 +8,9 @@
         "thread": "cpp",
         "tuple": "cpp",
         "variant": "cpp",
-        "*.mm": "cpp"
+        "*.mm": "cpp",
+        "vector": "cpp",
+        "complex": "cpp",
+        "cmath": "cpp"
     }
 }

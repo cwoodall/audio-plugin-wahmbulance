@@ -3,7 +3,8 @@
 
 //==============================================================================
 AutoWahProcessorEditor::AutoWahProcessorEditor(AutoWahProcessor &p)
-    : AudioProcessorEditor(&p), processorRef(p), gainAttachment(*p.gain, gainSlider) {
+    : AudioProcessorEditor(&p), processorRef(p), gainAttachment(*p.gain, gainSlider), 
+    lpfAttachment(*p.lpf_cutoff_Hz, lpfSlider) {
     juce::ignoreUnused(processorRef);
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -15,6 +16,14 @@ AutoWahProcessorEditor::AutoWahProcessorEditor(AutoWahProcessor &p)
     addAndMakeVisible(gainLabel);
     gainLabel.setText("Gain", juce::dontSendNotification);
     gainLabel.attachToComponent(&gainSlider, true); // [4]
+    
+    addAndMakeVisible(lpfSlider);
+    lpfSlider.setRange(0, 10000.0); // [1]
+    lpfSlider.setTextValueSuffix(" Hz"); // [2]
+    addAndMakeVisible(lpfLabel);
+    lpfLabel.setText("LPF Cutoff Hz", juce::dontSendNotification);
+    lpfLabel.attachToComponent(&lpfSlider, true); // [4]
+
 }
 
 AutoWahProcessorEditor::~AutoWahProcessorEditor() {
@@ -34,4 +43,5 @@ void AutoWahProcessorEditor::resized() {
     // subcomponents in your editor..
     auto sliderLeft = 120;
     gainSlider.setBounds(sliderLeft, 20, getWidth() - sliderLeft - 10, 100);
+    lpfSlider.setBounds(sliderLeft, 120, getWidth() - sliderLeft - 10, 100);
 }
