@@ -17,27 +17,23 @@ void VariableFreqBiquadFilter::setType(VariableFreqBiquadFilter::Type t) {
     this->filter_type = t;
 }
 
-void VariableFreqBiquadFilter::processBlock(juce::AudioBuffer<float> &buffer) {
-    buffer_z.resize(static_cast<size_t>(buffer.getNumChannels()), { 0.0f });
-    buffer_y.resize(static_cast<size_t>(buffer.getNumChannels()), { 0.0f });
+void VariableFreqBiquadFilter::step(const size_t n, const float in[], const float cutoff_freq[], const float q[], float out[]) {
+    for (size_t i = 0; i < n; i++) {
+        setCutoffFrequency(cutoff_freq[i]);
+        setQ(q[i]);
+        calculateGains();
 
-    calculateGains();
-    for (size_t channel = 0; channel < static_cast<size_t>(buffer.getNumChannels()); channel++) {
-        // to access the sample in the channel as a C-style array
-        auto channelSamples = buffer.getWritePointer(static_cast<int>(channel));
-        for (size_t i = 0; i < static_cast<size_t>(buffer.getNumSamples()); i++) {
-            buffer_z[channel][2] = buffer_z[channel][1];
-            buffer_z[channel][1] = buffer_z[channel][0];
-            buffer_z[channel][0] = channelSamples[i];
+        buffer_z[2] = buffer_z[1];
+        buffer_z[1] = buffer_z[0];
+        buffer_z[0] = in[i];
 
-            channelSamples[i] = gains_b[2] * buffer_z[channel][2]
-                                + gains_b[1] * buffer_z[channel][1]
-                                + gains_b[0] * buffer_z[channel][0]
-                                - gains_a[1] * buffer_y[channel][0]
-                                - gains_a[2] * buffer_y[channel][1];
-            buffer_y[channel][1] = buffer_y[channel][0];
-            buffer_y[channel][0] = channelSamples[i];
-        }
+        out[i] = gains_b[2] * buffer_z[2]
+                 + gains_b[1] * buffer_z[1]
+                 + gains_b[0] * buffer_z[0]
+                 - gains_a[1] * buffer_y[0]
+                 - gains_a[2] * buffer_y[1];
+        buffer_y[1] = buffer_y[0];
+        buffer_y[0] = out[i];
     }
 }
 

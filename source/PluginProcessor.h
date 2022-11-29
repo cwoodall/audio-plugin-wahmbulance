@@ -40,7 +40,10 @@ private:
     juce::AudioParameterFloat *q;
     // juce::AudioParameterChoice *filter_type;
 
-    VariableFreqBiquadFilter filter;
+    float sample_rate;
+    std::vector<float> cutoff_freqs;
+    std::vector<float> qs;
+    std::vector<VariableFreqBiquadFilter> filter;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutoWahProcessor)
     
     friend class AutoWahProcessorEditor;

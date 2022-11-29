@@ -79,8 +79,9 @@ void AutoWahProcessor::changeProgramName(int index, const juce::String &newName)
 void AutoWahProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    filter.setSamplingRate(static_cast<float>(sampleRate));
-    filter.setType(VariableFreqBiquadFilter::Type::LOWPASS);
+    sample_rate = (float)sampleRate;
+    cutoff_freqs.resize(static_cast<size_t>(samplesPerBlock), 0.f);
+    qs.resize(static_cast<size_t>(samplesPerBlock), 0.f);
 }
 
 void AutoWahProcessor::releaseResources() {
@@ -116,7 +117,8 @@ void AutoWahProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
-
+    size_t num_samples = static_cast<size_t>(buffer.getNumSamples());
+    size_t num_channels = static_cast<size_t>(buffer.getNumChannels());
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
@@ -124,23 +126,26 @@ void AutoWahProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     // when they first compile a plugin, but obviously you don't need to keep
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i) {
-        buffer.clear(i, 0, buffer.getNumSamples());
+        buffer.clear(i, 0, (int)num_samples);
     }
-    auto gain_copy = gain->get();
-    auto lpf_cutoff_copy = lpf_cutoff_Hz->get();
-    auto q_copy = q->get();
+    
+    filter.resize(static_cast<size_t>(num_channels));
 
-    filter.setCutoffFrequency(lpf_cutoff_copy);
-    filter.setQ(q_copy);
+    float gain_copy = gain->get();
+    float lpf_cutoff_copy = lpf_cutoff_Hz->get();
+    float q_copy = q->get();
 
-    filter.processBlock(buffer);
+    std::fill(cutoff_freqs.begin(), cutoff_freqs.end(), lpf_cutoff_copy);
+    std::fill(qs.begin(), qs.end(), q_copy);
 
-    for (auto channel = 0; channel < buffer.getNumChannels(); channel++) {
-        // to access the sample in the channel as a C-style array
-        auto channelSamples = buffer.getWritePointer(channel);
-        for (auto i = 0; i < buffer.getNumSamples(); i++) {
-            const auto inputSample = channelSamples[i];
-            channelSamples[i] = inputSample * gain_copy;
+    for (size_t channel = 0; channel < num_channels; channel++) {
+        float *channelSamples = buffer.getWritePointer((int)channel);
+        filter[channel].setSamplingRate(sample_rate);
+        filter[channel].setType(VariableFreqBiquadFilter::Type::LOWPASS);
+        filter[channel].step(num_samples, channelSamples, &cutoff_freqs[0], &qs[0], channelSamples);
+
+        for (size_t i = 0; i < num_samples; i++) {
+            channelSamples[i] = channelSamples[i] * gain_copy;
         }
     }
 }

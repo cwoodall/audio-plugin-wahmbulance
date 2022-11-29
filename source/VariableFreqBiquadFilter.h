@@ -21,15 +21,15 @@ public:
     void setQ(float q);
     void setType(VariableFreqBiquadFilter::Type t);
 
-    void processBlock(juce::AudioBuffer<float> &);
+    void step(size_t n, const float in[], const float cutoff_freq[], const float q[], float out[]);
 private:
     float sample_rate;
     float cutoff_freq_Hz;
     Type filter_type;
     float q;
 
-    std::vector<std::array<float, 3>> buffer_z;
-    std::vector<std::array<float, 2>> buffer_y;
+    std::array<float, 3> buffer_z;
+    std::array<float, 2> buffer_y;
 
     std::array<float, 3> gains_a;
     std::array<float, 3> gains_b;
