@@ -38,7 +38,7 @@ private:
     juce::AudioParameterFloat *gain;
     juce::AudioParameterFloat *lpf_cutoff_Hz;
     juce::AudioParameterFloat *q;
-    // juce::AudioParameterChoice *filter_type;
+    juce::AudioParameterChoice *filter_type;
 
     float sample_rate;
     std::vector<float> cutoff_freqs;
