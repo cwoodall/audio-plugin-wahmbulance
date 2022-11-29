@@ -16,7 +16,7 @@ AutoWahProcessorEditor::AutoWahProcessorEditor(AutoWahProcessor &p)
     addAndMakeVisible(gainLabel);
     gainLabel.setText("Gain", juce::dontSendNotification);
     gainLabel.attachToComponent(&gainSlider, true); // [4]
-    
+
     addAndMakeVisible(lpfSlider);
     lpfSlider.setRange(0, 10000.0); // [1]
     lpfSlider.setTextValueSuffix(" Hz"); // [2]
@@ -33,9 +33,6 @@ AutoWahProcessorEditor::~AutoWahProcessorEditor() {
 void AutoWahProcessorEditor::paint(juce::Graphics &g) {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-    g.setColour(juce::Colours::white);
-    g.setFont(15.0f);
-    g.drawFittedText("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
 }
 
 void AutoWahProcessorEditor::resized() {

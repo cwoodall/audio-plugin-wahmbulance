@@ -13,6 +13,8 @@ AutoWahProcessor::AutoWahProcessor()
     ) {
     addParameter(gain = new juce::AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f)); // [2]
     addParameter(lpf_cutoff_Hz = new juce::AudioParameterFloat("filter_cutoff", "Filter Cutoff", 0.0f, 10000.0f, 100.0f)); // [2]
+    addParameter(q = new juce::AudioParameterFloat("q", "Q", 0.0f, 50.0f, 0.707f)); // [2]
+    // addParameter(filter_type = new juce::AudioParameterChoice("filter_type", "Filter Type", juce: )); // [2]
 }
 
 AutoWahProcessor::~AutoWahProcessor() {
@@ -77,7 +79,8 @@ void AutoWahProcessor::changeProgramName(int index, const juce::String &newName)
 void AutoWahProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    lpf.setSamplingRate(static_cast<float>(sampleRate));
+    filter.setSamplingRate(static_cast<float>(sampleRate));
+    filter.setType(VariableFreqBiquadFilter::Type::LOWPASS);
 }
 
 void AutoWahProcessor::releaseResources() {
@@ -125,9 +128,12 @@ void AutoWahProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     }
     auto gain_copy = gain->get();
     auto lpf_cutoff_copy = lpf_cutoff_Hz->get();
+    auto q_copy = q->get();
 
-    lpf.setCutoffFrequency(lpf_cutoff_copy);
-    lpf.processBlock(buffer, midiMessages);
+    filter.setCutoffFrequency(lpf_cutoff_copy);
+    filter.setQ(q_copy);
+
+    filter.processBlock(buffer);
 
     for (auto channel = 0; channel < buffer.getNumChannels(); channel++) {
         // to access the sample in the channel as a C-style array

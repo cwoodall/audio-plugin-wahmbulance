@@ -11,6 +11,10 @@
         "*.mm": "cpp",
         "vector": "cpp",
         "complex": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "__config": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp"
     }
 }
