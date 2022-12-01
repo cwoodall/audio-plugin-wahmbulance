@@ -1,6 +1,11 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+template <typename T>
+T clip(const T &n, const T &lower, const T &upper) {
+    return std::max(lower, std::min(n, upper));
+}
+
 //==============================================================================
 AutoWahProcessor::AutoWahProcessor()
     : AudioProcessor(BusesProperties()
@@ -12,9 +17,13 @@ AutoWahProcessor::AutoWahProcessor()
 #endif
     ) {
     addParameter(gain = new juce::AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f)); // [2]
-    addParameter(lpf_cutoff_Hz = new juce::AudioParameterFloat("filter_cutoff", "Filter Cutoff", 0.0f, 10000.0f, 100.0f)); // [2]
-    addParameter(q = new juce::AudioParameterFloat("q", "Q", 0.0f, 50.0f, 0.707f)); // [2]
+    addParameter(starting_freq_Hz = new juce::AudioParameterFloat("starting_freq_Hz", "Starting Frequency Hz", 10.0f, 10000.0f, 100.0f)); // [2]
+    addParameter(q = new juce::AudioParameterFloat("q", "Q", 0.1f, 20.0f, 0.707f)); // [2]
+    addParameter(sensitivity = new juce::AudioParameterFloat("sensitivity", "Sensitivity", 0, 20000, 10000));
+    addParameter(envelope_gain = new juce::AudioParameterFloat("envelope_gain", "Envelope Gain", 0, 10, 1));
+    addParameter(envelope_lpf_Hz = new juce::AudioParameterFloat("envelope_lpf_Hz", "Envelope LPF Hz", .1, 20000, 1));
     addParameter(filter_type = new juce::AudioParameterChoice("filter_type", "Filter Type", { "Lowpass", "Bandpass", "Highpass" }, 0));
+    addParameter(mix = new juce::AudioParameterFloat("mix", "Mix", 0, 1, .5));
 }
 
 AutoWahProcessor::~AutoWahProcessor() {
@@ -81,7 +90,18 @@ void AutoWahProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
     // initialisation that you need..
     sample_rate = (float) sampleRate;
     cutoff_freqs.resize(static_cast<size_t>(samplesPerBlock), 0.f);
+    envelope_outs.resize(static_cast<size_t>(samplesPerBlock), 0.f);
     qs.resize(static_cast<size_t>(samplesPerBlock), 0.f);
+    signal_copy.resize(static_cast<size_t>(samplesPerBlock), 0.f);
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+    filter.resize(static_cast<size_t>(totalNumOutputChannels));
+    envelope_follower.resize(static_cast<size_t>(totalNumOutputChannels));
+    for (size_t channel = 0; channel < static_cast<size_t>(totalNumOutputChannels); channel++) {
+        envelope_follower[channel].setSamplingRate(sample_rate);
+
+        filter[channel].setSamplingRate(sample_rate);
+    }
 }
 
 void AutoWahProcessor::releaseResources() {
@@ -129,25 +149,34 @@ void AutoWahProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         buffer.clear(i, 0, (int) num_samples);
     }
 
-    filter.resize(static_cast<size_t>(num_channels));
-
     float gain_copy = gain->get();
-    float lpf_cutoff_copy = lpf_cutoff_Hz->get();
+    float lpf_cutoff_copy = starting_freq_Hz->get();
     float q_copy = q->get();
     auto filter_type_copy = static_cast<VariableFreqBiquadFilter::Type>(filter_type->getIndex());
+    auto sensitivity_copy = sensitivity->get();
+    auto envelope_gain_copy = envelope_gain->get();
+    auto envelope_lpf_Hz_copy = envelope_lpf_Hz->get();
+    auto mix_copy = mix->get();
 
     // TODO: replace these fills with the envelope follower
-    std::fill(cutoff_freqs.begin(), cutoff_freqs.end(), lpf_cutoff_copy);
     std::fill(qs.begin(), qs.end(), q_copy);
 
     for (size_t channel = 0; channel < num_channels; channel++) {
         float *channelSamples = buffer.getWritePointer((int) channel);
-        filter[channel].setSamplingRate(sample_rate);
+        signal_copy.assign(channelSamples, channelSamples + num_samples);
+
+        envelope_follower[channel].setCutoffFrequency(envelope_lpf_Hz_copy);
+        envelope_follower[channel].step(num_samples, channelSamples, &envelope_outs[0]);
+        for (size_t i = 0; i < num_samples; i++) {
+            cutoff_freqs[i] = lpf_cutoff_copy
+                              + envelope_gain_copy * envelope_outs[i] * sensitivity_copy; // Make programmable
+            cutoff_freqs[i] = clip<float>(cutoff_freqs[i], .1f, sample_rate / 2.0f - .1f);
+        }
         filter[channel].setType(filter_type_copy);
         filter[channel].step(num_samples, channelSamples, &cutoff_freqs[0], &qs[0], channelSamples);
 
         for (size_t i = 0; i < num_samples; i++) {
-            channelSamples[i] = channelSamples[i] * gain_copy;
+            channelSamples[i] = (mix_copy * channelSamples[i] + (1 - mix_copy) * signal_copy[i]) * gain_copy;
         }
     }
 }

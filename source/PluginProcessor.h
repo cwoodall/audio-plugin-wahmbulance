@@ -2,6 +2,7 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "VariableFreqBiquadFilter.h"
+#include "EnvelopeFollower.h"
 
 class AutoWahProcessor : public juce::AudioProcessor {
 public:
@@ -36,14 +37,23 @@ public:
 
 private:
     juce::AudioParameterFloat *gain;
-    juce::AudioParameterFloat *lpf_cutoff_Hz;
+    juce::AudioParameterFloat *mix;
+    juce::AudioParameterFloat *starting_freq_Hz;
     juce::AudioParameterFloat *q;
+    juce::AudioParameterFloat *sensitivity;
+    juce::AudioParameterFloat *envelope_gain;
+    juce::AudioParameterFloat *envelope_lpf_Hz;
     juce::AudioParameterChoice *filter_type;
 
     float sample_rate;
     std::vector<float> cutoff_freqs;
     std::vector<float> qs;
+    std::vector<float> envelope_outs;
+    std::vector<float> signal_copy;
+
     std::vector<VariableFreqBiquadFilter> filter;
+    std::vector<EnvelopeFollower> envelope_follower;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutoWahProcessor)
     
     friend class AutoWahProcessorEditor;

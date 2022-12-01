@@ -1,39 +1,67 @@
 #include "VariableFreqBiquadFilter.h"
 #include <cmath>
 
-void VariableFreqBiquadFilter::setSamplingRate(float sample_rate) {
-    this->sample_rate = sample_rate;
+VariableFreqBiquadFilter::VariableFreqBiquadFilter() {
+    first_run = true;
 }
 
-void VariableFreqBiquadFilter::setCutoffFrequency(float cutoff_freq) {
-    this->cutoff_freq_Hz = cutoff_freq;
+void VariableFreqBiquadFilter::setSamplingRate(float sr) {
+    this->sample_rate = sr;
 }
 
-void VariableFreqBiquadFilter::setQ(float q) {
-    this->q = q;
+void VariableFreqBiquadFilter::setCutoffFrequency(float cf) {
+    this->cutoff_freq_Hz = cf;
+}
+
+void VariableFreqBiquadFilter::setQ(float q_) {
+    this->q = q_;
 }
 
 void VariableFreqBiquadFilter::setType(VariableFreqBiquadFilter::Type t) {
     this->filter_type = t;
 }
 
-void VariableFreqBiquadFilter::step(const size_t n, const float in[], const float cutoff_freq[], const float q[], float out[]) {
+void VariableFreqBiquadFilter::step(const size_t n, const float in[], float out[]) {
+    calculateGains();
     for (size_t i = 0; i < n; i++) {
-        setCutoffFrequency(cutoff_freq[i]);
-        setQ(q[i]);
+        singleStep(in[i], &out[i]);
+    }
+}
+void VariableFreqBiquadFilter::step(const size_t n,
+                                    const float in[],
+                                    const float cutoff_freqs[],
+                                    const float qs[],
+                                    float out[]) {
+    for (size_t i = 0; i < n; i++) {
+        setCutoffFrequency(cutoff_freqs[i]);
+        setQ(qs[i]);
         calculateGains();
 
+        singleStep(in[i], &out[i]);
+    }
+}
+
+void VariableFreqBiquadFilter::singleStep(const float in, float *out) {
+    if (first_run) {
+        buffer_z[2] = in;
+        buffer_z[1] = in;
+        buffer_z[0] = in;
+        buffer_y[1] = in * (1 - gains_b[2] * gains_b[1] * gains_b[0]) / gains_a[1];
+        buffer_y[2] = 0;
+        first_run = false;
+    } else {
         buffer_z[2] = buffer_z[1];
         buffer_z[1] = buffer_z[0];
-        buffer_z[0] = in[i];
+        buffer_z[0] = in;
 
-        out[i] = gains_b[2] * buffer_z[2]
-                 + gains_b[1] * buffer_z[1]
-                 + gains_b[0] * buffer_z[0]
-                 - gains_a[1] * buffer_y[0]
-                 - gains_a[2] * buffer_y[1];
+        *out = gains_b[2] * buffer_z[2]
+               + gains_b[1] * buffer_z[1]
+               + gains_b[0] * buffer_z[0]
+               - gains_a[1] * buffer_y[0]
+               - gains_a[2] * buffer_y[1];
+
         buffer_y[1] = buffer_y[0];
-        buffer_y[0] = out[i];
+        buffer_y[0] = *out;
     }
 }
 
@@ -64,12 +92,12 @@ void VariableFreqBiquadFilter::calculateGains() {
         }
         case VariableFreqBiquadFilter::Type::HIGHPASS:
         default: {
-            gains_b[0] = 0.f;
-            gains_b[1] = 0.f;
-            gains_b[2] = 0.f;
-            gains_a[0] = 0.f;
-            gains_a[1] = 0.f;
-            gains_a[2] = 0.f;
+            gains_b[0] = norm;
+            gains_b[1] = -2.0f * gains_b[0];
+            gains_b[2] = gains_b[0];
+            gains_a[0] = 0;
+            gains_a[1] = 2 * (k * k - 1) * norm;
+            gains_a[2] = (1 - k / q + k * k) * norm;
             break;
         }
     }
