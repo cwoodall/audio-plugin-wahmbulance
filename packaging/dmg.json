@@ -1,5 +1,5 @@
 {
-  "title": "Autowah",
+  "title": "AutoWah",
   "icon": "pamplejuce.icns",
   "background": "background.jpg",
   "window": {
@@ -14,9 +14,9 @@
   },
   "format": "UDZO",
   "contents": [
-    { "x": 250, "y": 245, "type": "file", "path": "dmg/Autowah.component" },
+    { "x": 250, "y": 245, "type": "file", "path": "dmg/AutoWah.component" },
     { "x": 480, "y": 245, "type": "file", "path": "dmg/Your Mac's Component Folder" },
-    { "x": 250, "y": 405, "type": "file", "path": "dmg/Autowah.vst3" },
+    { "x": 250, "y": 405, "type": "file", "path": "dmg/AutoWah.vst3" },
     { "x": 480, "y": 405, "type": "file", "path": "dmg/Your Mac's VST3 Folder" }
   ]
 }

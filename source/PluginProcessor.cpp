@@ -19,11 +19,11 @@ AutoWahProcessor::AutoWahProcessor()
     addParameter(gain = new juce::AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f)); // [2]
     addParameter(starting_freq_Hz = new juce::AudioParameterFloat("starting_freq_Hz", "Starting Frequency Hz", 10.0f, 10000.0f, 100.0f)); // [2]
     addParameter(q = new juce::AudioParameterFloat("q", "Q", 0.1f, 20.0f, 0.707f)); // [2]
-    addParameter(sensitivity = new juce::AudioParameterFloat("sensitivity", "Sensitivity", 0, 20000, 10000));
-    addParameter(envelope_gain = new juce::AudioParameterFloat("envelope_gain", "Envelope Gain", 0, 10, 1));
-    addParameter(envelope_lpf_Hz = new juce::AudioParameterFloat("envelope_lpf_Hz", "Envelope LPF Hz", .1, 20000, 1));
+    addParameter(sensitivity = new juce::AudioParameterFloat("sensitivity", "Sensitivity", 0.f, 20000.f, 10000.f));
+    addParameter(envelope_gain = new juce::AudioParameterFloat("envelope_gain", "Envelope Gain", 0.f, 10.f, 1.f));
+    addParameter(envelope_lpf_Hz = new juce::AudioParameterFloat("envelope_lpf_Hz", "Envelope LPF Hz", .1f, 20000.f, 1.f));
     addParameter(filter_type = new juce::AudioParameterChoice("filter_type", "Filter Type", { "Lowpass", "Bandpass", "Highpass" }, 0));
-    addParameter(mix = new juce::AudioParameterFloat("mix", "Mix", 0, 1, .5));
+    addParameter(mix = new juce::AudioParameterFloat("mix", "Mix", 0.f, 1.f, .5f));
 }
 
 AutoWahProcessor::~AutoWahProcessor() {
