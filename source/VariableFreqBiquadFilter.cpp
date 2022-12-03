@@ -1,9 +1,7 @@
 #include "VariableFreqBiquadFilter.h"
 #include <cmath>
 
-#ifndef M_PI
-#define M_PI (3.1415926536f)
-#endif
+constexpr float PI = 3.1415926536f;
 
 VariableFreqBiquadFilter::VariableFreqBiquadFilter() {
     first_run = true;
@@ -71,7 +69,7 @@ void VariableFreqBiquadFilter::singleStep(const float in, float *out) {
 
 void VariableFreqBiquadFilter::calculateGains() {
     float wc = cutoff_freq_Hz / sample_rate;
-    float k = std::tan(static_cast<float>(M_PI) * wc);
+    float k = std::tan(static_cast<float>(PI) * wc);
     float norm = 1.f / (1.f + k / this->q + k * k);
 
     switch (filter_type) {
