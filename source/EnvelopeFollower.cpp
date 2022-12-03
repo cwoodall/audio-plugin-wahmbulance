@@ -1,6 +1,6 @@
 #include "EnvelopeFollower.h"
 #define _USE_MATH_DEFINES
-#include <cmath>
+#include <math.h>
 
 EnvelopeFollower::EnvelopeFollower()
 {
@@ -19,7 +19,7 @@ void EnvelopeFollower::setCutoffFrequency(float cutoff_freq) {
 void EnvelopeFollower::step(size_t n, const float in[], float out[]) {
     lpf.calculateGains();
     for (size_t i = 0; i < n; i++) {
-        const float abs_in = std::fabsf(in[i]);
+        const float abs_in = std::fabs(in[i]);
         lpf.singleStep(abs_in, &out[i]);
     }
 }
