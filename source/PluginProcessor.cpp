@@ -165,8 +165,11 @@ void AutoWahProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         float *channelSamples = buffer.getWritePointer((int) channel);
         signal_copy.assign(channelSamples, channelSamples + num_samples);
 
+        // Run the envelope follower
         envelope_follower[channel].setCutoffFrequency(envelope_lpf_Hz_copy);
         envelope_follower[channel].step(num_samples, channelSamples, &envelope_outs[0]);
+
+        // Apply the envelope follower signal to modulate 
         for (size_t i = 0; i < num_samples; i++) {
             cutoff_freqs[i] = lpf_cutoff_copy
                               + envelope_gain_copy * envelope_outs[i] * sensitivity_copy; // Make programmable
