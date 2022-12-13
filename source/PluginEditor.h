@@ -14,6 +14,8 @@ public:
     void resized() override;
 
 private:
+
+    std::unique_ptr<juce::Drawable> svg_drawable_play;
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     AutoWahProcessor& processorRef;
