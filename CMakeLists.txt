@@ -74,7 +74,8 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/source PREFIX "" FILES ${SOURCE_FI
 # Setup our binary data as a target
 juce_add_binary_data(Assets SOURCES 
     pamplejuce.png 
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/knob.svg)
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/knob.svg
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/knob_shadow.svg)
 
 # Required for Linux happiness:
 # See https://forum.juce.com/t/loading-pytorch-model-using-binarydata/39997/2
@@ -126,7 +127,7 @@ target_link_libraries("${PROJECT_NAME}"
 # include(CTest) does this too, but adds tons of targets we don't want
 # See: https://github.com/catchorg/Catch2/issues/2026
 # You could forgo ctest and call ./tests directly from the build dir
-enable_testing()
+# enable_testing()
 
 # "GLOBS ARE BAD" is brittle and silly UX, sorry CMake!
 # CONFIGURE_DEPENDS / Clion's CMake integration makes globbing absolutely fine
@@ -144,15 +145,15 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2) # find_package equivalent
 
 # Setup the test executable, again C++ 20 please
-add_executable(tests ${TestFiles})
-target_compile_features(tests PRIVATE cxx_std_20)
+# add_executable(tests ${TestFiles})
+# # target_compile_features(tests PRIVATE cxx_std_20)
 
-# Our test executable also wants to know about our plugin code...
-target_include_directories(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/source)
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain "${PROJECT_NAME}" ${JUCE_DEPENDENCIES})
+# # Our test executable also wants to know about our plugin code...
+# target_include_directories(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/source)
+# target_link_libraries(tests PRIVATE Catch2::Catch2WithMain "${PROJECT_NAME}" ${JUCE_DEPENDENCIES})
 
 # Make an Xcode Scheme for the test executable so we can run tests in the IDE
-set_target_properties(tests PROPERTIES XCODE_GENERATE_SCHEME ON)
+# set_target_properties(tests PROPERTIES XCODE_GENERATE_SCHEME ON)
 
 # Organize the test source in the tests/ folder in the IDE
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/tests PREFIX "" FILES ${TestFiles})
@@ -160,8 +161,8 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/tests PREFIX "" FILES ${TestFiles}
 # Load and use the .cmake file provided by Catch2
 # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
 # We have to manually provide the source directory here for now
-include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
-catch_discover_tests(tests)
+# include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
+# catch_discover_tests(tests)
 
 # Color our warnings and errors
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
