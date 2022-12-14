@@ -15,7 +15,6 @@ public:
 
 private:
 
-    std::unique_ptr<juce::Drawable> svg_drawable_play;
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     AutoWahProcessor& processorRef;
@@ -28,6 +27,7 @@ private:
     juce::SliderParameterAttachment lpfAttachment;
     std::unique_ptr<juce::Drawable> knobDrawable;
     std::unique_ptr<juce::Drawable> knobShadowDrawable;
+    std::unique_ptr<juce::Drawable> knobTopShadowDrawable;
 
     CWLookAndFeel lookAndFeel;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutoWahProcessorEditor)

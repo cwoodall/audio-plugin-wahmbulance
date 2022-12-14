@@ -7,9 +7,10 @@ cmake_minimum_required(VERSION 3.21)
 # This cannot have spaces (but PRODUCT_NAME can)
 set(PROJECT_NAME "AutoWah")
 
+set(CMAKE_BUILD_TYPE Debug)
 # Set the plugin formats you'll be building here.
 # Valid formats: AAX Unity VST AU AUv3 Standalone
-set(FORMATS AU VST3 AUv3)
+set(FORMATS Standalone VST3)
 
 # Reads in VERSION file and sticks in it CURRENT_VERSION variable
 # Be sure the file has no newlines
@@ -72,14 +73,7 @@ set_target_properties("${PROJECT_NAME}" PROPERTIES FOLDER "")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/source PREFIX "" FILES ${SOURCE_FILES})
 
 # Setup our binary data as a target
-juce_add_binary_data(Assets SOURCES 
-    pamplejuce.png 
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/knob.svg
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/knob_shadow.svg)
-
-# Required for Linux happiness:
-# See https://forum.juce.com/t/loading-pytorch-model-using-binarydata/39997/2
-set_target_properties(Assets PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
 # This cleans up the folder organization on Xcode.
 # It tucks the Plugin varieties into a "Targets" folder and generate an Xcode Scheme manually

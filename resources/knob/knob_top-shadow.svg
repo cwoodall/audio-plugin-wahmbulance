@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='us-ascii'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" height="503.9848pt" viewBox="0 0 503.74206 503.9848" width="503.74207pt" version="1.1" id="svg120" sodipodi:docname="knob.svg" inkscape:version="1.2.2 (b0a84865, 2022-12-01)">
+  <sodipodi:namedview id="namedview122" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#505050" inkscape:document-units="pt" showgrid="false" inkscape:zoom="1" inkscape:cx="225" inkscape:cy="308.5" inkscape:window-width="1470" inkscape:window-height="841" inkscape:window-x="0" inkscape:window-y="37" inkscape:window-maximized="1" inkscape:current-layer="Layer 4" showguides="false" />
+  <defs id="defs109">
+    <linearGradient inkscape:collect="always" id="linearGradient2529">
+      <stop style="stop-color:#000000;stop-opacity:1;" offset="0" id="stop2525" />
+      <stop style="stop-color:#000000;stop-opacity:0.23958331;" offset="1" id="stop2527" />
+    </linearGradient>
+    <linearGradient inkscape:collect="always" id="linearGradient5190">
+      <stop style="stop-color:#000000;stop-opacity:0.44791663;" offset="0" id="stop5186" />
+      <stop style="stop-color:#b1b1b1;stop-opacity:0;" offset="1" id="stop5188" />
+    </linearGradient>
+    <radialGradient cx="256.45801" r="46.743698" id="RadialGradient" gradientUnits="userSpaceOnUse" gradientTransform="matrix(2.2862092,-0.04094313,0.02100335,4.4566525,-331.10182,-369.59238)" cy="138.416">
+      <stop stop-color="#e2e2e2" offset="0.231203" id="stop104" style="stop-color:#e2e2e2;stop-opacity:1;" />
+      <stop stop-color="#ffffff" offset="1" id="stop106" style="stop-color:#ffffff;stop-opacity:1;" />
+    </radialGradient>
+    <filter style="color-interpolation-filters:sRGB" inkscape:label="Drop Shadow" id="filter5096" x="-0.020720722" y="-0.020905605" width="1.0415658" height="1.1034222">
+      <feFlood flood-opacity="0.529412" flood-color="rgb(0,0,0)" result="flood" id="feFlood5086" />
+      <feComposite in="flood" in2="SourceGraphic" operator="in" result="composite1" id="feComposite5088" />
+      <feGaussianBlur in="composite1" stdDeviation="3.2" result="blur" id="feGaussianBlur5090" />
+      <feOffset dx="0" dy="30" result="offset" id="feOffset5092" />
+      <feComposite in="SourceGraphic" in2="offset" operator="over" result="composite2" id="feComposite5094" />
+    </filter>
+    <linearGradient inkscape:collect="always" xlink:href="#linearGradient5190" id="linearGradient5192" x1="249.36583" y1="486.90222" x2="251.96609" y2="3.8312225" gradientUnits="userSpaceOnUse" />
+    <linearGradient inkscape:collect="always" xlink:href="#linearGradient2529" id="linearGradient2801" x1="237.81497" y1="226.71494" x2="248.64732" y2="533.90472" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1.0221135,0,0,1,-4.8296274,0)" />
+  </defs>
+  <g inkscape:groupmode="layer" id="layer3" inkscape:label="top-shadow" style="display:inline" transform="translate(4.2167328,6.0233449)">
+    <path stroke="#000000" d="m 250.69857,2.512435 c -41.53,-0.2707 -49.434,3.8401 -64.663,7.1357 -50.725,10.9767 -79.979,35.4329 -118.401494,71.8008 -12.9155,12.2253 -25.9369,36.299295 -34.4778,51.275295 -45.283019,79.4 -31.3402505,151.489 -15.5167,193.175 23.4076,61.667 41.5164,79.909 73.6232,108.489 33.770794,30.062 94.521794,56.695 157.755794,54.97 49.203,-1.342 123.26,-31.595 154.335,-56.783 54.231,-43.959 63.607,-65.838 82.427,-133.199 19.145,-68.524 -2.74,-155.088 -45.037,-203.853995 -34.762,-40.0773 -70.879,-67.8543 -119.614,-83.2384 -6.813,-2.1505 -51.693,-9.6492 -70.431,-9.7714 z" stroke-width="1" opacity="1" stroke-linejoin="round" id="gradient" style="fill:url(#linearGradient5192);fill-opacity:1;stroke:#000000;stroke-width:5;stroke-dasharray:none;stroke-opacity:0" sodipodi:nodetypes="ccccccccsccc" />
+    <rect style="display:inline;fill:none;fill-opacity:1;stroke:#595959;stroke-width:0;stroke-dasharray:none;stroke-opacity:0" id="rect2761" width="495.11765" height="492.70834" x="7.1654177" y="8.8265734" transform="translate(-8.3700833,-10.031239)" />
+  </g>
+</svg>
