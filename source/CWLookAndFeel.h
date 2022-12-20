@@ -1,7 +1,7 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
-
+#include "BinaryData.h"
 class CWLookAndFeel : public juce::LookAndFeel_V4 {
 public:
     CWLookAndFeel(const juce::Drawable &knobDrawable,
@@ -14,7 +14,8 @@ public:
         setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::black);
         setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::white);
         setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::white);
-    }
+        setColour(juce::ResizableWindow::backgroundColourId, juce::Colour(0x554742));
+            }
 
     void drawRotarySlider(juce::Graphics &g,
                           int x,

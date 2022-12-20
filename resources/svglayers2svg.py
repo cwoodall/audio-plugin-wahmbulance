@@ -11,6 +11,9 @@ tree = ET.parse(sys.argv[1])
 root = tree.getroot()
 listoflayers=[]
 
+# Add these here to prevent the ns0: and other prefixes from being added. This is required to give
+# the xml writer the correct namespace associations. Without this juce will not be able to properly 
+# parse the output svg file
 ET.register_namespace("","http://www.w3.org/2000/svg")
 ET.register_namespace("sodipodi","http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd")
 ET.register_namespace("inkscape", "http://www.inkscape.org/namespaces/inkscape")

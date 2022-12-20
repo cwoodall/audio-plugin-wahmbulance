@@ -19,7 +19,8 @@ execute_process(
 file(GLOB KnobFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/knob/knob_*.svg")
 
 juce_add_binary_data(Assets SOURCES 
-    ${KnobFiles})
+    ${KnobFiles}
+    ${CMAKE_CURRENT_LIST_DIR}/background.png)
 
 # Required for Linux happiness:
 # See https://forum.juce.com/t/loading-pytorch-model-using-binarydata/39997/2

@@ -28,7 +28,10 @@ private:
     std::unique_ptr<juce::Drawable> knobDrawable;
     std::unique_ptr<juce::Drawable> knobShadowDrawable;
     std::unique_ptr<juce::Drawable> knobTopShadowDrawable;
+    std::unique_ptr<juce::Drawable> background;
 
     CWLookAndFeel lookAndFeel;
+
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutoWahProcessorEditor)
 };
