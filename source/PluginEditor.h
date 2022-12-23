@@ -2,6 +2,9 @@
 
 #include "PluginProcessor.h"
 #include "CWLookAndFeel.h"
+
+using namespace std;
+using namespace juce;
 //==============================================================================
 class AutoWahProcessorEditor : public juce::AudioProcessorEditor
 {
@@ -12,6 +15,8 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+
+    void paintOverChildren(Graphics&) override;
 
 private:
 
@@ -25,10 +30,13 @@ private:
     juce::Slider startingFreqSlider { juce::Slider::RotaryVerticalDrag, juce::Slider::TextBoxBelow };
     juce::Label startingFreqLabel;
     juce::SliderParameterAttachment lpfAttachment;
-    std::unique_ptr<juce::Drawable> knobDrawable;
-    std::unique_ptr<juce::Drawable> knobShadowDrawable;
-    std::unique_ptr<juce::Drawable> knobTopShadowDrawable;
-    std::unique_ptr<juce::Drawable> background;
+    unique_ptr<juce::Drawable> knobDrawable;
+    unique_ptr<juce::Drawable> knobShadowDrawable;
+    unique_ptr<juce::Drawable> knobTopShadowDrawable;
+    unique_ptr<juce::Drawable> background;
+    unique_ptr<Drawable>background_text;
+    unique_ptr<Drawable>overlay;
+    unique_ptr<Drawable>debugOverlay;
 
     CWLookAndFeel lookAndFeel;
 

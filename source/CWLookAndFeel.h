@@ -14,7 +14,9 @@ public:
         setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::black);
         setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::white);
         setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::white);
-        setColour(juce::ResizableWindow::backgroundColourId, juce::Colour(0x554742));
+        setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(0xffb7c4cf));
+        setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colour(0xffa73ed7));
+        setColour(juce::ResizableWindow::backgroundColourId, juce::Colour(0xff554742));
             }
 
     void drawRotarySlider(juce::Graphics &g,
@@ -25,24 +27,46 @@ public:
                           float sliderPosProportional,
                           float,
                           float,
-                          juce::Slider &) override {
-        auto bounds = getSquareCenteredInRectangle(x, y, width, height);
+                          juce::Slider &slider) override {
+        // Draw the background arcs
+        float lengthPastKnobEnd = 5.0f; // Draw 5 x past knob size
+
+        auto bounds = getSquareCenteredInRectangle(x+lengthPastKnobEnd, y+lengthPastKnobEnd, width-lengthPastKnobEnd*2, height-lengthPastKnobEnd*2);
         auto centre = bounds.getCentre();
+        auto rotationAngle = (sliderPosProportional - 0.5f) * 1.5f * juce::MathConstants<float>::pi;
+        auto startingAngle = (0 - 0.5f) * 1.5f * juce::MathConstants<float>::pi;
+
+        juce::Path backgroundCircle;
+        backgroundCircle.addCentredArc(centre.getX(), centre.getY(), width/2, height/2, 0, 0, (2.0f*juce::MathConstants<float>::pi), false);
+
+        auto fillType = juce::FillType();
+        fillType.setColour(slider.findColour(juce::Slider::ColourIds::backgroundColourId));
+        g.setFillType(fillType);
+        g.fillPath(backgroundCircle);
+
+        juce::Path arc;
+        arc.startNewSubPath (centre.getX(), centre.getY());
+        arc.addCentredArc(centre.getX(), centre.getY(), width/2, height/2, 0, startingAngle, rotationAngle, false);
+        arc.closeSubPath();                          // close the subpath with a line back to (10, 10)
+
+        fillType = juce::FillType();
+        fillType.setColour(slider.findColour(juce::Slider::ColourIds::rotarySliderFillColourId));
+        g.setFillType(fillType);
+        g.fillPath(arc);
+
+        //
+
         auto shiftX = bounds.getX() - static_cast<float>(x);
         auto shiftY = bounds.getY() - static_cast<float>(y);
 
-        auto shadowTransform = juce::AffineTransform::scale(bounds.getWidth() / knob->getWidth())
-                                   .translated(shiftX, shiftY);
-        knobShadow->setTransform(shadowTransform);
-        knobShadow->drawAt(g, static_cast<float>(x), static_cast<float>(y), 1.f);
-        auto rotationAngle = (sliderPosProportional - 0.5f) * 1.5f * juce::MathConstants<float>::pi;
         auto transform = juce::AffineTransform::scale(bounds.getWidth() / knob->getWidth())
-                             .translated(shiftX, shiftY)
+                                   .translated(shiftX, shiftY);
+        auto rotationTransform = transform
                              .rotated(rotationAngle, centre.x, centre.y);
-        knob->setTransform(transform);
+        knob->setTransform(rotationTransform);
         knob->drawAt(g, static_cast<float>(x), static_cast<float>(y), 1.0f);
 
-        knobTopShadow->setTransform(shadowTransform);
+        knobTopShadow->setTransform(transform);
         knobTopShadow->drawAt(g, static_cast<float>(x), static_cast<float>(y), 1.f);
 
     }
