@@ -1,4 +1,4 @@
-name: AutoWah
+name: Wahmbulance
 
 on:
   workflow_dispatch: # lets you run a build from the UI
@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PROJECT_NAME: AutoWah
+  PROJECT_NAME: Wahmbulance
   BUILD_TYPE: Release
   BUILD_DIR: Builds
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

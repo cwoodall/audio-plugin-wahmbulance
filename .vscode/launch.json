@@ -19,7 +19,27 @@
             "logging": {
                 "moduleLoad": false
             }
+        }, 
+        {
+            "name": "(lldb) Bitwig Debug",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "PATH",
+                    "value": "$PATH:${command:cmake.launchTargetDirectory}"
+                }
+            ],
+            "MIMode": "lldb",
+            "logging": {
+                "moduleLoad": false
+            }
         }
+
     ]
 }
 

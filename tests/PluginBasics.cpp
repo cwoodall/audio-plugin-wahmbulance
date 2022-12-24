@@ -7,9 +7,9 @@ TEST_CASE("one is equal to one", "[dummy]") {
 }
 
 // https://github.com/McMartin/FRUT/issues/490#issuecomment-663544272
-AutoWahProcessor testPlugin;
+WahmbulanceProcessor testPlugin;
 
 TEST_CASE("Plugin instance name", "[name]") {
     CHECK_THAT(testPlugin.getName().toStdString(),
-               Catch::Matchers::Equals("AutoWah"));
+               Catch::Matchers::Equals("Wahmbulance"));
 }

@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.21)
 
 # Change this to the name of your plugin
 # This cannot have spaces (but PRODUCT_NAME can)
-set(PROJECT_NAME "AutoWah")
+set(PROJECT_NAME "Wahmbulance")
 
 set(CMAKE_BUILD_TYPE Debug)
 # Set the plugin formats you'll be building here.

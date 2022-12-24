@@ -4,10 +4,10 @@
 #include "VariableFreqBiquadFilter.h"
 #include "EnvelopeFollower.h"
 
-class AutoWahProcessor : public juce::AudioProcessor {
+class WahmbulanceProcessor : public juce::AudioProcessor {
 public:
-    AutoWahProcessor();
-    ~AutoWahProcessor() override;
+    WahmbulanceProcessor();
+    ~WahmbulanceProcessor() override;
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -36,16 +36,19 @@ public:
     void setStateInformation(const void *data, int sizeInBytes) override;
 
 private:
-    juce::AudioParameterFloat *gain;
-    juce::AudioParameterFloat *mix;
-    juce::AudioParameterFloat *starting_freq_Hz;
-    juce::AudioParameterFloat *q;
-    juce::AudioParameterFloat *sensitivity;
-    juce::AudioParameterFloat *envelope_gain;
-    juce::AudioParameterFloat *envelope_lpf_Hz;
-    juce::AudioParameterChoice *filter_type;
+    juce::AudioParameterFloat *filterStartingFreqHz;
+    juce::AudioParameterFloat *filterResonance;
+    juce::AudioParameterFloat *filterRangeHz;
+    juce::AudioParameterChoice *filterType;
 
-    float sample_rate;
+    juce::AudioParameterFloat *envelopeSensitivity;
+    juce::AudioParameterFloat *envelopeAttackS;
+    juce::AudioParameterFloat *envelopeDecayS;
+
+    juce::AudioParameterFloat *outputGain;
+    juce::AudioParameterFloat *outputMix;
+
+    float sampleRateHz;
     std::vector<float> cutoff_freqs;
     std::vector<float> qs;
     std::vector<float> envelope_outs;
@@ -54,7 +57,7 @@ private:
     std::vector<VariableFreqBiquadFilter> filter;
     std::vector<EnvelopeFollower> envelope_follower;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutoWahProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WahmbulanceProcessor)
     
-    friend class AutoWahProcessorEditor;
+    friend class WahmbulanceProcessorEditor;
 };

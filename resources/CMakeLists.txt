@@ -3,7 +3,7 @@
 # 3.21 is also bundled in CLion as of 2021.3
 cmake_minimum_required(VERSION 3.21)
 
-# project(AutoWah_Resources)
+# project(Wahmbulance_Resources)
 
 set(Python3_FIND_UNVERSIONED_NAMES NEVER)
 find_package(Python3 REQUIRED)

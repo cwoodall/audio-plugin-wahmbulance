@@ -7,7 +7,7 @@ T clip(const T &n, const T &lower, const T &upper) {
 }
 
 //==============================================================================
-AutoWahProcessor::AutoWahProcessor()
+WahmbulanceProcessor::WahmbulanceProcessor()
     : AudioProcessor(BusesProperties()
 #if ! JucePlugin_IsMidiEffect
 #if ! JucePlugin_IsSynth
@@ -16,25 +16,26 @@ AutoWahProcessor::AutoWahProcessor()
                          .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
     ) {
-    addParameter(gain = new juce::AudioParameterFloat("gain", "Gain", 0.0f, 1.0f, 0.5f)); // [2]
-    addParameter(starting_freq_Hz = new juce::AudioParameterFloat("starting_freq_Hz", "Starting Frequency Hz", 10.0f, 10000.0f, 100.0f)); // [2]
-    addParameter(q = new juce::AudioParameterFloat("q", "Q", 0.1f, 20.0f, 0.707f)); // [2]
-    addParameter(sensitivity = new juce::AudioParameterFloat("sensitivity", "Sensitivity", 0.f, 20000.f, 10000.f));
-    addParameter(envelope_gain = new juce::AudioParameterFloat("envelope_gain", "Envelope Gain", 0.f, 10.f, 1.f));
-    addParameter(envelope_lpf_Hz = new juce::AudioParameterFloat("envelope_lpf_Hz", "Envelope LPF Hz", .1f, 20000.f, 1.f));
-    addParameter(filter_type = new juce::AudioParameterChoice("filter_type", "Filter Type", { "Lowpass", "Bandpass", "Highpass" }, 0));
-    addParameter(mix = new juce::AudioParameterFloat("mix", "Mix", 0.f, 1.f, .5f));
+    addParameter(outputGain = new juce::AudioParameterFloat("outputGain", "Gain", 0.0f, 1.0f, 0.5f)); // [2]
+    addParameter(filterStartingFreqHz = new juce::AudioParameterFloat("filterStartingFreqHz", "Starting Frequency Hz", 10.0f, 10000.0f, 100.0f)); // [2]
+    addParameter(filterResonance = new juce::AudioParameterFloat("filterResonance", "Q", 0.1f, 20.0f, 0.707f)); // [2]
+    addParameter(filterRangeHz = new juce::AudioParameterFloat("filterRangeHz", "Sensitivity", 0.f, 20000.f, 10000.f));
+    addParameter(envelopeSensitivity = new juce::AudioParameterFloat("envelopeSensitivity", "Envelope Gain", 0.f, 10.f, 1.f));
+    addParameter(envelopeAttackS = new juce::AudioParameterFloat("envelopeAttackS", "Envelope LPF Hz", .1f, 20000.f, 1.f));
+    addParameter(envelopeDecayS = new juce::AudioParameterFloat("envelopeDecayS", "Envelope LPF Hz", .1f, 20000.f, 1.f));
+    addParameter(filterType = new juce::AudioParameterChoice("filterType", "Filter Type", { "Lowpass", "Bandpass", "Highpass" }, 0));
+    addParameter(outputMix = new juce::AudioParameterFloat("outputMix", "Mix", 0.f, 1.f, .5f));
 }
 
-AutoWahProcessor::~AutoWahProcessor() {
+WahmbulanceProcessor::~WahmbulanceProcessor() {
 }
 
 //==============================================================================
-const juce::String AutoWahProcessor::getName() const {
+const juce::String WahmbulanceProcessor::getName() const {
     return JucePlugin_Name;
 }
 
-bool AutoWahProcessor::acceptsMidi() const {
+bool WahmbulanceProcessor::acceptsMidi() const {
 #if JucePlugin_WantsMidiInput
     return true;
 #else
@@ -42,7 +43,7 @@ bool AutoWahProcessor::acceptsMidi() const {
 #endif
 }
 
-bool AutoWahProcessor::producesMidi() const {
+bool WahmbulanceProcessor::producesMidi() const {
 #if JucePlugin_ProducesMidiOutput
     return true;
 #else
@@ -50,7 +51,7 @@ bool AutoWahProcessor::producesMidi() const {
 #endif
 }
 
-bool AutoWahProcessor::isMidiEffect() const {
+bool WahmbulanceProcessor::isMidiEffect() const {
 #if JucePlugin_IsMidiEffect
     return true;
 #else
@@ -58,37 +59,37 @@ bool AutoWahProcessor::isMidiEffect() const {
 #endif
 }
 
-double AutoWahProcessor::getTailLengthSeconds() const {
+double WahmbulanceProcessor::getTailLengthSeconds() const {
     return 0.0;
 }
 
-int AutoWahProcessor::getNumPrograms() {
+int WahmbulanceProcessor::getNumPrograms() {
     return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
         // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int AutoWahProcessor::getCurrentProgram() {
+int WahmbulanceProcessor::getCurrentProgram() {
     return 0;
 }
 
-void AutoWahProcessor::setCurrentProgram(int index) {
+void WahmbulanceProcessor::setCurrentProgram(int index) {
     juce::ignoreUnused(index);
 }
 
-const juce::String AutoWahProcessor::getProgramName(int index) {
+const juce::String WahmbulanceProcessor::getProgramName(int index) {
     juce::ignoreUnused(index);
     return {};
 }
 
-void AutoWahProcessor::changeProgramName(int index, const juce::String &newName) {
+void WahmbulanceProcessor::changeProgramName(int index, const juce::String &newName) {
     juce::ignoreUnused(index, newName);
 }
 
 //==============================================================================
-void AutoWahProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
+void WahmbulanceProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    sample_rate = (float) sampleRate;
+    sampleRateHz = (float) sampleRate;
     cutoff_freqs.resize(static_cast<size_t>(samplesPerBlock), 0.f);
     envelope_outs.resize(static_cast<size_t>(samplesPerBlock), 0.f);
     qs.resize(static_cast<size_t>(samplesPerBlock), 0.f);
@@ -98,18 +99,18 @@ void AutoWahProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
     filter.resize(static_cast<size_t>(totalNumOutputChannels));
     envelope_follower.resize(static_cast<size_t>(totalNumOutputChannels));
     for (size_t channel = 0; channel < static_cast<size_t>(totalNumOutputChannels); channel++) {
-        envelope_follower[channel].setSamplingRate(sample_rate);
+        envelope_follower[channel].setSamplingRate(sampleRateHz);
 
-        filter[channel].setSamplingRate(sample_rate);
+        filter[channel].setSamplingRate(sampleRateHz);
     }
 }
 
-void AutoWahProcessor::releaseResources() {
+void WahmbulanceProcessor::releaseResources() {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
-bool AutoWahProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const {
+bool WahmbulanceProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const {
 #if JucePlugin_IsMidiEffect
     juce::ignoreUnused(layouts);
     return true;
@@ -130,7 +131,7 @@ bool AutoWahProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const 
 #endif
 }
 
-void AutoWahProcessor::processBlock(juce::AudioBuffer<float> &buffer,
+void WahmbulanceProcessor::processBlock(juce::AudioBuffer<float> &buffer,
                                     juce::MidiBuffer &midiMessages) {
     juce::ignoreUnused(midiMessages);
 
@@ -149,14 +150,14 @@ void AutoWahProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         buffer.clear(i, 0, (int) num_samples);
     }
 
-    float gain_copy = gain->get();
-    float lpf_cutoff_copy = starting_freq_Hz->get();
-    float q_copy = q->get();
-    auto filter_type_copy = static_cast<VariableFreqBiquadFilter::Type>(filter_type->getIndex());
-    auto sensitivity_copy = sensitivity->get();
-    auto envelope_gain_copy = envelope_gain->get();
-    auto envelope_lpf_Hz_copy = envelope_lpf_Hz->get();
-    auto mix_copy = mix->get();
+    float gain_copy = outputGain->get();
+    float lpf_cutoff_copy = filterStartingFreqHz->get();
+    float q_copy = filterResonance->get();
+    auto filter_type_copy = static_cast<VariableFreqBiquadFilter::Type>(filterType->getIndex());
+    auto sensitivity_copy = filterRangeHz->get();
+    auto envelope_gain_copy = envelopeSensitivity->get();
+    auto envelope_lpf_Hz_copy = envelopeAttackS->get();
+    auto mix_copy = outputMix->get();
 
     // TODO: replace these fills with the envelope follower
     std::fill(qs.begin(), qs.end(), q_copy);
@@ -173,7 +174,7 @@ void AutoWahProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         for (size_t i = 0; i < num_samples; i++) {
             cutoff_freqs[i] = lpf_cutoff_copy
                               + envelope_gain_copy * envelope_outs[i] * sensitivity_copy; // Make programmable
-            cutoff_freqs[i] = clip<float>(cutoff_freqs[i], .1f, sample_rate / 2.0f - .1f);
+            cutoff_freqs[i] = clip<float>(cutoff_freqs[i], .1f, sampleRateHz / 2.0f - .1f);
         }
         filter[channel].setType(filter_type_copy);
         filter[channel].step(num_samples, channelSamples, &cutoff_freqs[0], &qs[0], channelSamples);
@@ -185,23 +186,23 @@ void AutoWahProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 }
 
 //==============================================================================
-bool AutoWahProcessor::hasEditor() const {
+bool WahmbulanceProcessor::hasEditor() const {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor *AutoWahProcessor::createEditor() {
-    return new AutoWahProcessorEditor(*this);
+juce::AudioProcessorEditor *WahmbulanceProcessor::createEditor() {
+    return new WahmbulanceProcessorEditor(*this);
 }
 
 //==============================================================================
-void AutoWahProcessor::getStateInformation(juce::MemoryBlock &destData) {
+void WahmbulanceProcessor::getStateInformation(juce::MemoryBlock &destData) {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
     juce::ignoreUnused(destData);
 }
 
-void AutoWahProcessor::setStateInformation(const void *data, int sizeInBytes) {
+void WahmbulanceProcessor::setStateInformation(const void *data, int sizeInBytes) {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
     juce::ignoreUnused(data, sizeInBytes);
@@ -210,5 +211,5 @@ void AutoWahProcessor::setStateInformation(const void *data, int sizeInBytes) {
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter() {
-    return new AutoWahProcessor();
+    return new WahmbulanceProcessor();
 }
