@@ -1,7 +1,7 @@
 #pragma once
-#include <juce_audio_processors/juce_audio_processors.h>
-#include <array>
 #include "VariableFreqBiquadFilter.h"
+#include <array>
+#include <juce_audio_processors/juce_audio_processors.h>
 
 /**
  * @brief 
@@ -12,10 +12,19 @@ class EnvelopeFollower {
 public:
     EnvelopeFollower();
 
-    void setSamplingRate(float sample_rate);
-    void setCutoffFrequency(float cutoff_freq);
+    void setSamplingRate(float sampleRate);
+    void setAttackTimeConstant(float attackMs);
+    void setDecayTimeConstant(float decayMs);
 
     void step(size_t n, const float in[], float out[]);
+
 private:
-    VariableFreqBiquadFilter lpf;
+    float envelope;
+    float attackMs;
+    float decayMs;
+    float sampleRate;
+
+    float attackCoef;
+    float decayCoef;
+    void calculateGains();
 };

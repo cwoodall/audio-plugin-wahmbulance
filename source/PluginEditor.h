@@ -6,6 +6,12 @@
 using namespace std;
 using namespace juce;
 
+
+    enum RadioButtonIds
+    {
+        FilterTypeRadioGroupId = 1001
+    };
+
 //==============================================================================
 class WahmbulanceProcessorEditor : public juce::AudioProcessorEditor
 {
@@ -45,6 +51,9 @@ private:
     SliderParameterAttachment outputGainAttachment;
     SliderParameterAttachment outputMixAttachment;
 
+    ComboBox filterTypeComboBox;
+    ComboBoxParameterAttachment filterTypeAttachment;
+    
     vector<tuple<Component&, array<float, 4>>> componentPositions;
 
     unique_ptr<juce::Drawable> knobDrawable;

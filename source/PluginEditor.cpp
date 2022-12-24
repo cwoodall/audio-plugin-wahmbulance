@@ -27,10 +27,11 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
       filterResonanceAttachment(*p.filterResonance, filterResonanceSlider),
       filterRangeHzAttachment(*p.filterRangeHz, filterRangeHzSlider),
       envelopeSensitivityAttachment(*p.envelopeSensitivity, envelopeSensitivitySlider),
-      envelopeAttackSAttachment(*p.envelopeAttackS, envelopeAttackSSlider),
-      envelopeDecaySAttachment(*p.envelopeDecayS, envelopeDecaySSlider),
+      envelopeAttackSAttachment(*p.envelopeAttackMs, envelopeAttackSSlider),
+      envelopeDecaySAttachment(*p.envelopeDecayMs, envelopeDecaySSlider),
       outputGainAttachment(*p.outputGain, outputGainSlider),
       outputMixAttachment(*p.outputMix, outputMixSlider),
+      filterTypeAttachment(*p.filterType, filterTypeComboBox),
       componentPositions { {
           { filterStartingFreqHzSlider, { PLUGIN_ORIGINAL_COLUMN_0_PX, PLUGIN_ORIGINAL_ROW_0_PX, PLUGIN_ORIGINAL_KNOB_WIDTH, PLUGIN_ORIGINAL_KNOB_HEIGHT } },
           { filterRangeHzSlider, { PLUGIN_ORIGINAL_COLUMN_1_PX, PLUGIN_ORIGINAL_ROW_0_PX, PLUGIN_ORIGINAL_KNOB_WIDTH, PLUGIN_ORIGINAL_KNOB_HEIGHT } },
@@ -63,7 +64,7 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
     addAndMakeVisible(filterResonanceSlider);
 
     addAndMakeVisible(filterRangeHzSlider);
-    outputMixSlider.getProperties().set("rotaryKnobFromMidPoint", static_cast<bool>(true));
+    filterRangeHzSlider.getProperties().set("rotaryKnobFromMidPoint", static_cast<bool>(true));
 
     addAndMakeVisible(envelopeSensitivitySlider);
 
@@ -75,6 +76,10 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
 
     addAndMakeVisible(outputMixSlider);
     outputMixSlider.getProperties().set("rotaryKnobFromMidPoint", static_cast<bool>(true));
+    addAndMakeVisible(filterTypeComboBox);
+    filterTypeComboBox.addItemList(
+        {"Lowpass", "Bandpass", "Highpass"}, 1
+    );
 }
 
 WahmbulanceProcessorEditor::~WahmbulanceProcessorEditor() {
@@ -119,4 +124,6 @@ void WahmbulanceProcessorEditor::resized() {
         // subcomponents in your editor..
         component.setBounds(static_cast<int>(x), static_cast<int>(y), static_cast<int>(w), static_cast<int>(h));
     }
+
+    filterTypeComboBox.setBounds(252, 24, 34*3, 44);
 }

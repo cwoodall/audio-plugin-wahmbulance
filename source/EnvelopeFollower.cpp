@@ -1,25 +1,33 @@
 #include "EnvelopeFollower.h"
+#include "CWDspMath.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-EnvelopeFollower::EnvelopeFollower()
-{
-    lpf.setQ(.707f);
-    lpf.setType(VariableFreqBiquadFilter::Type::LOWPASS);
+EnvelopeFollower::EnvelopeFollower() {
+    envelope = 0;
 }
 
-void EnvelopeFollower::setSamplingRate(float sample_rate) {
-    lpf.setSamplingRate(sample_rate);
+void EnvelopeFollower::setSamplingRate(float sampleRate) {
+    this->sampleRate = sampleRate;
 }
- 
-void EnvelopeFollower::setCutoffFrequency(float cutoff_freq) {
-    lpf.setCutoffFrequency(cutoff_freq);
+
+void EnvelopeFollower::setAttackTimeConstant(float attackMs) {
+    this->attackMs = clip<float>(attackMs, .1f, 1000.0f);
+}
+
+void EnvelopeFollower::setDecayTimeConstant(float decayMs) {
+    this->decayMs = clip<float>(decayMs, .1f, 1000.0f);
+}
+
+void EnvelopeFollower::calculateGains() {
+    attackCoef = 1.0f - std::expf(-1.0f / (attackMs * sampleRate * 0.001f));
+    decayCoef = 1.0f - std::expf(-1.0f / (decayMs * sampleRate * 0.001f));
 }
 
 void EnvelopeFollower::step(size_t n, const float in[], float out[]) {
-    lpf.calculateGains();
+    calculateGains();
     for (size_t i = 0; i < n; i++) {
-        const float abs_in = std::fabs(in[i]);
-        lpf.singleStep(abs_in, &out[i]);
+        const float absIn = std::fabs(in[i]);
+        envelope += (absIn - envelope) * (absIn > envelope ? attackCoef : decayCoef);
     }
 }

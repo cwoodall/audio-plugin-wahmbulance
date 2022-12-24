@@ -42,8 +42,8 @@ private:
     juce::AudioParameterChoice *filterType;
 
     juce::AudioParameterFloat *envelopeSensitivity;
-    juce::AudioParameterFloat *envelopeAttackS;
-    juce::AudioParameterFloat *envelopeDecayS;
+    juce::AudioParameterFloat *envelopeAttackMs;
+    juce::AudioParameterFloat *envelopeDecayMs;
 
     juce::AudioParameterFloat *outputGain;
     juce::AudioParameterFloat *outputMix;

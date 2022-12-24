@@ -1,10 +1,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-template <typename T>
-T clip(const T &n, const T &lower, const T &upper) {
-    return std::max(lower, std::min(n, upper));
-}
+#include "CWDspMath.h"
 
 //==============================================================================
 WahmbulanceProcessor::WahmbulanceProcessor()
@@ -16,15 +13,15 @@ WahmbulanceProcessor::WahmbulanceProcessor()
                          .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
     ) {
-    addParameter(outputGain = new juce::AudioParameterFloat("outputGain", "Gain", 0.0f, 1.0f, 0.5f)); // [2]
     addParameter(filterStartingFreqHz = new juce::AudioParameterFloat("filterStartingFreqHz", "Starting Frequency Hz", 10.0f, 10000.0f, 100.0f)); // [2]
-    addParameter(filterResonance = new juce::AudioParameterFloat("filterResonance", "Q", 0.1f, 20.0f, 0.707f)); // [2]
-    addParameter(filterRangeHz = new juce::AudioParameterFloat("filterRangeHz", "Sensitivity", 0.f, 20000.f, 10000.f));
-    addParameter(envelopeSensitivity = new juce::AudioParameterFloat("envelopeSensitivity", "Envelope Gain", 0.f, 10.f, 1.f));
-    addParameter(envelopeAttackS = new juce::AudioParameterFloat("envelopeAttackS", "Envelope LPF Hz", .1f, 20000.f, 1.f));
-    addParameter(envelopeDecayS = new juce::AudioParameterFloat("envelopeDecayS", "Envelope LPF Hz", .1f, 20000.f, 1.f));
+    addParameter(filterResonance = new juce::AudioParameterFloat("filterResonance", "Resonance", 0.1f, 20.0f, 2)); // [2]
+    addParameter(filterRangeHz = new juce::AudioParameterFloat("filterRangeHz", "Range", -20000.0f, 20000.f, 1000.f));
+    addParameter(envelopeSensitivity = new juce::AudioParameterFloat("envelopeSensitivity", "Envelope Sensitivity", 0.f, 10.f, 1.f));
+    addParameter(envelopeAttackMs = new juce::AudioParameterFloat("envelopeAttackMs", "Envelope Attack", .1f, 1000.f, 5.f));
+    addParameter(envelopeDecayMs = new juce::AudioParameterFloat("envelopeDecayMs", "Envelope Decay", .1f, 1000.f, 100.f));
     addParameter(filterType = new juce::AudioParameterChoice("filterType", "Filter Type", { "Lowpass", "Bandpass", "Highpass" }, 0));
     addParameter(outputMix = new juce::AudioParameterFloat("outputMix", "Mix", 0.f, 1.f, .5f));
+    addParameter(outputGain = new juce::AudioParameterFloat("outputGain", "Gain", 0.0f, 1.0f, 0.5f)); // [2]
 }
 
 WahmbulanceProcessor::~WahmbulanceProcessor() {
@@ -151,12 +148,13 @@ void WahmbulanceProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     }
 
     float gain_copy = outputGain->get();
-    float lpf_cutoff_copy = filterStartingFreqHz->get();
+    float filterCutoffHzCopy = filterStartingFreqHz->get();
     float q_copy = filterResonance->get();
     auto filter_type_copy = static_cast<VariableFreqBiquadFilter::Type>(filterType->getIndex());
-    auto sensitivity_copy = filterRangeHz->get();
-    auto envelope_gain_copy = envelopeSensitivity->get();
-    auto envelope_lpf_Hz_copy = envelopeAttackS->get();
+    auto filterRangeCopy = filterRangeHz->get();
+    auto envelopeSensitivityCopy = envelopeSensitivity->get();
+    auto envelopeAttackMsCopy = envelopeAttackMs->get();
+    auto envelopeDecayMsCopy = envelopeDecayMs->get();
     auto mix_copy = outputMix->get();
 
     // TODO: replace these fills with the envelope follower
@@ -167,13 +165,14 @@ void WahmbulanceProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         signal_copy.assign(channelSamples, channelSamples + num_samples);
 
         // Run the envelope follower
-        envelope_follower[channel].setCutoffFrequency(envelope_lpf_Hz_copy);
+        envelope_follower[channel].setAttackTimeConstant(envelopeAttackMsCopy);
+        envelope_follower[channel].setDecayTimeConstant(envelopeDecayMsCopy);
         envelope_follower[channel].step(num_samples, channelSamples, &envelope_outs[0]);
 
         // Apply the envelope follower signal to modulate 
         for (size_t i = 0; i < num_samples; i++) {
-            cutoff_freqs[i] = lpf_cutoff_copy
-                              + envelope_gain_copy * envelope_outs[i] * sensitivity_copy; // Make programmable
+            cutoff_freqs[i] = filterCutoffHzCopy
+                              + envelopeSensitivityCopy * envelope_outs[i] * filterRangeCopy; // Make programmable
             cutoff_freqs[i] = clip<float>(cutoff_freqs[i], .1f, sampleRateHz / 2.0f - .1f);
         }
         filter[channel].setType(filter_type_copy);

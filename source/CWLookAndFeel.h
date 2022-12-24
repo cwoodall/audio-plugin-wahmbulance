@@ -16,6 +16,9 @@ public:
                                                                  knobShadow(knobShadowDrawable.createCopy()),
                                                                  knobTopShadow(knobTopShadowDrawable.createCopy()) {
         setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
+        setColour(juce::ToggleButton::ColourIds::textColourId, juce::Colours::black);
+        setColour(juce::ToggleButton::ColourIds::tickColourId, juce::Colours::black);
+        setColour(juce::ToggleButton::ColourIds::tickDisabledColourId, juce::Colours::black);
         setColour(juce::PopupMenu::ColourIds::backgroundColourId, juce::Colours::black);
         setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::black);
         setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::white);
@@ -100,41 +103,6 @@ public:
                                                                T width,
                                                                T height) {
         return getSquareCenteredInRectangle(juce::Rectangle<T>(x, y, width, height));
-    }
-
-    void drawComboBox(juce::Graphics &g,
-                      int width,
-                      int height,
-                      bool,
-                      int,
-                      int,
-                      int,
-                      int,
-                      juce::ComboBox &box) override {
-        juce::Rectangle<int> bounds(0, 0, width, height);
-
-        g.fillAll(juce::Colours::black);
-        g.setColour(juce::Colours::white);
-        g.drawRect(bounds);
-
-        juce::Rectangle<int> arrowZone(width - 20, 0, 15, height);
-        juce::Path path;
-        path.startNewSubPath(arrowZone.getX() + 3.0f, arrowZone.getCentreY() - 2.0f);
-        path.lineTo(static_cast<float>(arrowZone.getCentreX()), arrowZone.getCentreY() + 3.0f);
-        path.lineTo(arrowZone.getRight() - 3.0f, arrowZone.getCentreY() - 2.0f);
-
-        g.setColour(box.findColour(juce::ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
-        g.strokePath(path, juce::PathStrokeType(1.5f));
-    }
-
-    void drawButtonBackground(juce::Graphics &g,
-                              juce::Button &button,
-                              const juce::Colour &backgroundColour,
-                              bool,
-                              bool) override {
-        g.fillAll(backgroundColour);
-        g.setColour(juce::Colours::white);
-        g.drawRect(button.getLocalBounds());
     }
 
 private:
