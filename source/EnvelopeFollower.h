@@ -14,17 +14,17 @@ public:
 
     void setSamplingRate(float sampleRate);
     void setAttackTimeConstant(float attackMs);
-    void setDecayTimeConstant(float decayMs);
+    void setReleaseTimeConstant(float releaseMs);
 
     void step(size_t n, const float in[], float out[]);
 
 private:
     float envelope;
     float attackMs;
-    float decayMs;
+    float releaseMs;
     float sampleRate;
 
     float attackCoef;
-    float decayCoef;
+    float releaseCoef;
     void calculateGains();
 };

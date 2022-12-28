@@ -24,6 +24,7 @@ juce_add_binary_data(Assets SOURCES
     ${KnobFiles}
     ${BackgroundFiles}
     ${DebugFiles}
+    ${CMAKE_CURRENT_LIST_DIR}/DSEG14ModernMini-Regular.ttf
     )
 
 # Required for Linux happiness:

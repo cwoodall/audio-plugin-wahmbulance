@@ -4,8 +4,8 @@
 [Setup]
 AppName=Wahmbulance
 OutputBaseFilename=Wahmbulance-{#Version}-Windows
-AppCopyright=Copyright (C) {#Year} Melatonin
-AppPublisher=Melatonin
+AppCopyright=Copyright (C) {#Year} Chris Woodall
+AppPublisher=Chris Woodall
 AppVersion={#Version}
 DefaultDirName="{commoncf64}\VST3"
 DisableStartupPrompt=yes

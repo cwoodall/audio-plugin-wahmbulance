@@ -28,7 +28,7 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
       filterRangeHzAttachment(*p.filterRangeHz, filterRangeHzSlider),
       envelopeSensitivityAttachment(*p.envelopeSensitivity, envelopeSensitivitySlider),
       envelopeAttackSAttachment(*p.envelopeAttackMs, envelopeAttackSSlider),
-      envelopeDecaySAttachment(*p.envelopeDecayMs, envelopeDecaySSlider),
+      envelopeReleaseSAttachment(*p.envelopeReleaseMs, envelopeReleaseSSlider),
       outputGainAttachment(*p.outputGain, outputGainSlider),
       outputMixAttachment(*p.outputMix, outputMixSlider),
       filterTypeAttachment(*p.filterType, filterTypeComboBox),
@@ -37,7 +37,7 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
           { filterRangeHzSlider, { PLUGIN_ORIGINAL_COLUMN_1_PX, PLUGIN_ORIGINAL_ROW_0_PX, PLUGIN_ORIGINAL_KNOB_WIDTH, PLUGIN_ORIGINAL_KNOB_HEIGHT } },
           { filterResonanceSlider, { PLUGIN_ORIGINAL_COLUMN_2_PX, PLUGIN_ORIGINAL_ROW_0_PX, PLUGIN_ORIGINAL_KNOB_WIDTH, PLUGIN_ORIGINAL_KNOB_HEIGHT } },
           { envelopeAttackSSlider, { PLUGIN_ORIGINAL_COLUMN_0_PX, PLUGIN_ORIGINAL_ROW_1_PX, PLUGIN_ORIGINAL_KNOB_WIDTH, PLUGIN_ORIGINAL_KNOB_HEIGHT } },
-          { envelopeDecaySSlider, { PLUGIN_ORIGINAL_COLUMN_1_PX, PLUGIN_ORIGINAL_ROW_1_PX, PLUGIN_ORIGINAL_KNOB_WIDTH, PLUGIN_ORIGINAL_KNOB_HEIGHT } },
+          { envelopeReleaseSSlider, { PLUGIN_ORIGINAL_COLUMN_1_PX, PLUGIN_ORIGINAL_ROW_1_PX, PLUGIN_ORIGINAL_KNOB_WIDTH, PLUGIN_ORIGINAL_KNOB_HEIGHT } },
           { envelopeSensitivitySlider, { PLUGIN_ORIGINAL_COLUMN_2_PX, PLUGIN_ORIGINAL_ROW_1_PX, PLUGIN_ORIGINAL_KNOB_WIDTH, PLUGIN_ORIGINAL_KNOB_HEIGHT } },
           { outputMixSlider, { PLUGIN_ORIGINAL_COLUMN_3_PX, PLUGIN_ORIGINAL_ROW_1_PX, PLUGIN_ORIGINAL_KNOB_WIDTH, PLUGIN_ORIGINAL_KNOB_HEIGHT } },
           { outputGainSlider, { PLUGIN_ORIGINAL_COLUMN_4_PX, PLUGIN_ORIGINAL_ROW_1_PX, PLUGIN_ORIGINAL_KNOB_WIDTH, PLUGIN_ORIGINAL_KNOB_HEIGHT } },
@@ -49,7 +49,8 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
       background_text(Drawable::createFromImageData(BinaryData::background_text_png, BinaryData::background_text_pngSize)),
       overlay(Drawable::createFromImageData(BinaryData::shadow_overlay_png, BinaryData::shadow_overlay_pngSize)),
       debugOverlay(Drawable::createFromImageData(BinaryData::debug_overlay_png, BinaryData::debug_overlay_pngSize)),
-
+      displayFont(Typeface::createSystemTypefaceFor (BinaryData::DSEG14ModernMiniRegular_ttf,
+                                                                BinaryData::DSEG14ModernMiniRegular_ttfSize)),
       lookAndFeel(*knobDrawable, *knobShadowDrawable, *knobTopShadowDrawable) {
     ignoreUnused(processorRef);
 
@@ -70,7 +71,7 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
 
     addAndMakeVisible(envelopeAttackSSlider);
 
-    addAndMakeVisible(envelopeDecaySSlider);
+    addAndMakeVisible(envelopeReleaseSSlider);
 
     addAndMakeVisible(outputGainSlider);
 

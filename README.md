@@ -1,5 +1,4 @@
-![PAMPLEJUCE](pamplejuce.png)
-[![](https://github.com/sudara/pamplejuce/workflows/Pamplejuce/badge.svg)](https://github.com/sudara/pamplejuce/actions)
+[![](https://github.com/cwoodall/wahmbulance/workflows/Pamplejuce/badge.svg)](https://github.com/cwoodall/wahmbulance/actions)
 
 Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in 2022.
 
@@ -27,7 +26,7 @@ Read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-us
 
 This is a template repo! 
 
-That means the easiest thing to do is  click "[Use this template](https://github.com/sudara/pamplejuce/generate)" here or at the top of the page to get your own repo with all the code here.
+That means the easiest thing to do is  click "[Use this template](https://github.com/cwoodall/wahmbulance/generate)" here or at the top of the page to get your own repo with all the code here.
 
 For an example of a plugin that uses this repo, check out [Load Monster!](https://github.com/sudara/load_monster_plugin).
 

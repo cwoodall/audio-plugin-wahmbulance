@@ -43,7 +43,7 @@ private:
 
     juce::AudioParameterFloat *envelopeSensitivity;
     juce::AudioParameterFloat *envelopeAttackMs;
-    juce::AudioParameterFloat *envelopeDecayMs;
+    juce::AudioParameterFloat *envelopeReleaseMs;
 
     juce::AudioParameterFloat *outputGain;
     juce::AudioParameterFloat *outputMix;

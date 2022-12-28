@@ -18,7 +18,7 @@ WahmbulanceProcessor::WahmbulanceProcessor()
     addParameter(filterRangeHz = new juce::AudioParameterFloat("filterRangeHz", "Range", -20000.0f, 20000.f, 1000.f));
     addParameter(envelopeSensitivity = new juce::AudioParameterFloat("envelopeSensitivity", "Envelope Sensitivity", 0.f, 10.f, 1.f));
     addParameter(envelopeAttackMs = new juce::AudioParameterFloat("envelopeAttackMs", "Envelope Attack", .1f, 1000.f, 5.f));
-    addParameter(envelopeDecayMs = new juce::AudioParameterFloat("envelopeDecayMs", "Envelope Decay", .1f, 1000.f, 100.f));
+    addParameter(envelopeReleaseMs = new juce::AudioParameterFloat("envelopeReleaseMs", "Envelope Release", .1f, 1000.f, 100.f));
     addParameter(filterType = new juce::AudioParameterChoice("filterType", "Filter Type", { "Lowpass", "Bandpass", "Highpass" }, 0));
     addParameter(outputMix = new juce::AudioParameterFloat("outputMix", "Mix", 0.f, 1.f, .5f));
     addParameter(outputGain = new juce::AudioParameterFloat("outputGain", "Gain", 0.0f, 1.0f, 0.5f)); // [2]
@@ -154,7 +154,7 @@ void WahmbulanceProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     auto filterRangeCopy = filterRangeHz->get();
     auto envelopeSensitivityCopy = envelopeSensitivity->get();
     auto envelopeAttackMsCopy = envelopeAttackMs->get();
-    auto envelopeDecayMsCopy = envelopeDecayMs->get();
+    auto envelopeReleaseMsCopy = envelopeReleaseMs->get();
     auto mix_copy = outputMix->get();
 
     // TODO: replace these fills with the envelope follower
@@ -166,7 +166,7 @@ void WahmbulanceProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 
         // Run the envelope follower
         envelope_follower[channel].setAttackTimeConstant(envelopeAttackMsCopy);
-        envelope_follower[channel].setDecayTimeConstant(envelopeDecayMsCopy);
+        envelope_follower[channel].setReleaseTimeConstant(envelopeReleaseMsCopy);
         envelope_follower[channel].step(num_samples, channelSamples, &envelope_outs[0]);
 
         // Apply the envelope follower signal to modulate 
