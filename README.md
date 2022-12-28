@@ -53,7 +53,7 @@ After you've created a new repo:
 1. Your tests will be in "tests" and you can just add new .cpp files there.
 2. Your binary data target is called "Assets"
 
-## Releases
+## ReleaseMs
 
 You can cut a release with downloadable assets by creating a tag starting with `v` and pushing it to GitHub. Note that you currently *must push the tag along with an actual commit*.
 
@@ -68,7 +68,7 @@ git push --tags
 
 I'll work on making this less awkward...
 
-Releases are set to `prerelease`, which means that uploaded release assets are visible to other users, but it's not explicitly listed as the latest release until changed in the GitHub UI.
+ReleaseMs are set to `prerelease`, which means that uploaded release assets are visible to other users, but it's not explicitly listed as the latest release until changed in the GitHub UI.
 
 ## Code signing and Notarization
 

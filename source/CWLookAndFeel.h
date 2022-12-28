@@ -3,34 +3,44 @@
 #include "BinaryData.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 
+using namespace juce;
+
 enum CWColourIds {
     rotaryKnobArcFillColourId = 0x101,
     rotaryKnobArcFillReverseColourId = 0x102,
 };
 
-class CWLookAndFeel : public juce::LookAndFeel_V4 {
+class CWLookAndFeel : public LookAndFeel_V4 {
 public:
-    CWLookAndFeel(const juce::Drawable &knobDrawable,
-                  const juce::Drawable &knobShadowDrawable,
-                  const juce::Drawable &knobTopShadowDrawable) : knob(knobDrawable.createCopy()),
+    CWLookAndFeel(const Drawable &knobDrawable,
+                  const Drawable &knobShadowDrawable,
+                  const Drawable &knobTopShadowDrawable) : knob(knobDrawable.createCopy()),
                                                                  knobShadow(knobShadowDrawable.createCopy()),
                                                                  knobTopShadow(knobTopShadowDrawable.createCopy()) {
-        setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::black);
-        setColour(juce::ToggleButton::ColourIds::textColourId, juce::Colours::black);
-        setColour(juce::ToggleButton::ColourIds::tickColourId, juce::Colours::black);
-        setColour(juce::ToggleButton::ColourIds::tickDisabledColourId, juce::Colours::black);
-        setColour(juce::PopupMenu::ColourIds::backgroundColourId, juce::Colours::black);
-        setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::black);
-        setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::white);
-        setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::white);
-        setColour(juce::Slider::ColourIds::backgroundColourId, juce::Colour(0xffb7c4cf));
-        setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colour(0xffa73ed7));
-        setColour(CWColourIds::rotaryKnobArcFillColourId, juce::Colour(0xffa73ed7));
-        setColour(CWColourIds::rotaryKnobArcFillReverseColourId, juce::Colour(0xff4b3ed7));
-        setColour(juce::ResizableWindow::backgroundColourId, juce::Colour(0xff554742));
+        setColour(TextButton::ColourIds::buttonColourId, Colours::black);
+        setColour(ToggleButton::ColourIds::textColourId, Colours::black);
+        setColour(ToggleButton::ColourIds::tickColourId, Colours::black);
+        setColour(ToggleButton::ColourIds::tickDisabledColourId, Colours::black);
+        setColour(PopupMenu::ColourIds::backgroundColourId, Colours::black);
+        setColour(ComboBox::ColourIds::backgroundColourId, Colours::black);
+        setColour(ComboBox::ColourIds::arrowColourId, Colours::white);
+        setColour(ComboBox::ColourIds::outlineColourId, Colours::white);
+        setColour(Slider::ColourIds::backgroundColourId, Colour(0xffb7c4cf));
+        setColour(Slider::ColourIds::rotarySliderFillColourId, Colour(0xffa73ed7));
+        setColour(CWColourIds::rotaryKnobArcFillColourId, Colour(0xffa73ed7));
+        setColour(CWColourIds::rotaryKnobArcFillReverseColourId, Colour(0xff4b3ed7));
+        setColour(ResizableWindow::backgroundColourId, Colour(0xff554742));
     }
 
-    void drawRotarySlider(juce::Graphics &g,
+    Font getComboBoxFont(ComboBox &) override {
+        return getCommonMenuFont();
+    }
+
+    Font getPopupMenuFont() override {
+        return getCommonMenuFont();
+    }
+
+    void drawRotarySlider(Graphics &g,
                           int x,
                           int y,
                           int width,
@@ -38,25 +48,25 @@ public:
                           float sliderPosProportional,
                           float,
                           float,
-                          juce::Slider &slider) override {
+                          Slider &slider) override {
         // Draw the background arcs
         float lengthPastKnobEnd = 5.0f; // Draw 5 x past knob size
 
         auto bounds = getSquareCenteredInRectangle(x + lengthPastKnobEnd, y + lengthPastKnobEnd, width - lengthPastKnobEnd * 2, height - lengthPastKnobEnd * 2);
         auto centre = bounds.getCentre();
-        auto rotationAngle = (sliderPosProportional - 0.5f) * 1.5f * juce::MathConstants<float>::pi;
-        auto startingAngle = (0 - 0.5f) * 1.5f * juce::MathConstants<float>::pi;
+        auto rotationAngle = (sliderPosProportional - 0.5f) * 1.5f * MathConstants<float>::pi;
+        auto startingAngle = (0 - 0.5f) * 1.5f * MathConstants<float>::pi;
 
-        juce::Path backgroundCircle;
-        backgroundCircle.addCentredArc(centre.getX(), centre.getY(), width / 2, height / 2, 0, 0, (juce::MathConstants<float>::twoPi), false);
+        Path backgroundCircle;
+        backgroundCircle.addCentredArc(centre.getX(), centre.getY(), width / 2, height / 2, 0, 0, (MathConstants<float>::twoPi), false);
 
-        auto fillType = juce::FillType();
-        fillType.setColour(slider.findColour(juce::Slider::ColourIds::backgroundColourId));
+        auto fillType = FillType();
+        fillType.setColour(slider.findColour(Slider::ColourIds::backgroundColourId));
         g.setFillType(fillType);
         g.fillPath(backgroundCircle);
 
-        juce::Path arc;
-        juce::Colour arcColour = findColour(juce::Slider::ColourIds::rotarySliderFillColourId);
+        Path arc;
+        Colour arcColour = findColour(Slider::ColourIds::rotarySliderFillColourId);
         if (slider.getProperties().contains("rotaryKnobFromMidPoint")) {
             arc.startNewSubPath(centre.getX(), centre.getY());
             arc.addCentredArc(centre.getX(), centre.getY(), width / 2, height / 2, 0, 0, rotationAngle, false);
@@ -68,8 +78,8 @@ public:
             arc.closeSubPath(); // close the subpath with a line back to (10, 10)
         }
 
-        // juce::Colour color = slider.getValue() < 0.0f ? : juce::Slider::ColourIds::rotarySliderFillColourId;
-        fillType = juce::FillType();
+        // Colour color = slider.getValue() < 0.0f ? : Slider::ColourIds::rotarySliderFillColourId;
+        fillType = FillType();
         fillType.setColour(arcColour);
         g.setFillType(fillType);
         g.fillPath(arc);
@@ -79,7 +89,7 @@ public:
         auto shiftX = bounds.getX() - static_cast<float>(x);
         auto shiftY = bounds.getY() - static_cast<float>(y);
 
-        auto transform = juce::AffineTransform::scale(bounds.getWidth() / knob->getWidth())
+        auto transform = AffineTransform::scale(bounds.getWidth() / knob->getWidth())
                              .translated(shiftX, shiftY);
         auto rotationTransform = transform
                                      .rotated(rotationAngle, centre.x, centre.y);
@@ -91,22 +101,29 @@ public:
     }
 
     template <typename T>
-    static juce::Rectangle<float> getSquareCenteredInRectangle(const juce::Rectangle<T> &rectangle) {
+    static Rectangle<float> getSquareCenteredInRectangle(const Rectangle<T> &rectangle) {
         auto edgeLength = std::min(rectangle.getWidth(), rectangle.getHeight());
-        auto square = juce::Rectangle<T>(edgeLength, edgeLength).withCentre(rectangle.getCentre());
+        auto square = Rectangle<T>(edgeLength, edgeLength).withCentre(rectangle.getCentre());
         return square.toFloat();
     }
 
     template <typename T>
-    static juce::Rectangle<float> getSquareCenteredInRectangle(T x,
+    static Rectangle<float> getSquareCenteredInRectangle(T x,
                                                                T y,
                                                                T width,
                                                                T height) {
-        return getSquareCenteredInRectangle(juce::Rectangle<T>(x, y, width, height));
+        return getSquareCenteredInRectangle(Rectangle<T>(x, y, width, height));
     }
 
 private:
-    std::unique_ptr<juce::Drawable> knob;
-    std::unique_ptr<juce::Drawable> knobShadow;
-    std::unique_ptr<juce::Drawable> knobTopShadow;
+    std::unique_ptr<Drawable> knob;
+    std::unique_ptr<Drawable> knobShadow;
+    std::unique_ptr<Drawable> knobTopShadow;
+
+    Font getCommonMenuFont()
+    {
+        auto tempFont = Font(Typeface::createSystemTypefaceFor(BinaryData::FiraMonoRegular_ttf, BinaryData::FiraMonoRegular_ttfSize));
+        tempFont.setHeight(14);
+        return tempFont;
+    }
 };

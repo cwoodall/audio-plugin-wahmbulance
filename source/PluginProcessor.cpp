@@ -16,9 +16,9 @@ WahmbulanceProcessor::WahmbulanceProcessor()
     addParameter(filterStartingFreqHz = new juce::AudioParameterFloat("filterStartingFreqHz", "Starting Frequency Hz", 10.0f, 10000.0f, 100.0f)); // [2]
     addParameter(filterResonance = new juce::AudioParameterFloat("filterResonance", "Resonance", 0.1f, 20.0f, 2)); // [2]
     addParameter(filterRangeHz = new juce::AudioParameterFloat("filterRangeHz", "Range", -20000.0f, 20000.f, 1000.f));
-    addParameter(envelopeSensitivity = new juce::AudioParameterFloat("envelopeSensitivity", "Envelope Sensitivity", 0.f, 10.f, 1.f));
-    addParameter(envelopeAttackMs = new juce::AudioParameterFloat("envelopeAttackMs", "Envelope Attack", .1f, 1000.f, 5.f));
-    addParameter(envelopeReleaseMs = new juce::AudioParameterFloat("envelopeReleaseMs", "Envelope Release", .1f, 1000.f, 100.f));
+    addParameter(envelopeSensitivity = new juce::AudioParameterFloat("envelopeSensitivity", "Envelope Sensitivity", 0.f, 5.f, 1.f));
+    addParameter(envelopeAttackMs = new juce::AudioParameterFloat("envelopeAttackMs", "Envelope Attack", .1f, 500.f, 5.f));
+    addParameter(envelopeReleaseMs = new juce::AudioParameterFloat("envelopeReleaseMs", "Envelope Release", .1f, 500.f, 100.f));
     addParameter(filterType = new juce::AudioParameterChoice("filterType", "Filter Type", { "Lowpass", "Bandpass", "Highpass" }, 0));
     addParameter(outputMix = new juce::AudioParameterFloat("outputMix", "Mix", 0.f, 1.f, .5f));
     addParameter(outputGain = new juce::AudioParameterFloat("outputGain", "Gain", 0.0f, 1.0f, 0.5f)); // [2]

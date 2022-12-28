@@ -1,5 +1,5 @@
 # 3.21 is bundled in VSCode 2022
-# https://docs.microsoft.com/en-us/visualstudio/releases/2022/release-notes
+# https://docs.microsoft.com/en-us/visualstudio/ReleaseMs/2022/release-notes
 # 3.21 is also bundled in CLion as of 2021.3
 cmake_minimum_required(VERSION 3.21)
 
@@ -25,6 +25,7 @@ juce_add_binary_data(Assets SOURCES
     ${BackgroundFiles}
     ${DebugFiles}
     ${CMAKE_CURRENT_LIST_DIR}/DSEG14ModernMini-Regular.ttf
+    ${CMAKE_CURRENT_LIST_DIR}/FiraMono-Regular.ttf
     )
 
 # Required for Linux happiness:
