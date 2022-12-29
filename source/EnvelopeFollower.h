@@ -22,7 +22,7 @@ private:
     float envelope;
     float attackMs;
     float releaseMs;
-    float sampleRate;
+    float  sampleRate;
 
     float attackCoef;
     float releaseCoef;

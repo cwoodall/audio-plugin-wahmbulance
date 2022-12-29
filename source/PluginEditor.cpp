@@ -3,6 +3,8 @@
 #include "PluginProcessor.h"
 #include <tuple>
 #include <vector>
+#include <cmp_plot.h>
+#include <cmp_lookandfeel.h>
 
 using namespace std;
 using namespace juce;
@@ -18,6 +20,53 @@ using namespace juce;
 #define PLUGIN_ORIGINAL_COLUMN_4_PX (328)
 #define PLUGIN_ORIGINAL_KNOB_HEIGHT (53)
 #define PLUGIN_ORIGINAL_KNOB_WIDTH (53)
+
+class CWPlotLookAndFeel : public cmp::PlotLookAndFeel {
+  void drawBackground(juce::Graphics& g,
+                      const juce::Rectangle<int>& bound) override {
+    g.setColour(juce::Colours::black);
+  };
+
+  void drawFrame(juce::Graphics &g, const juce::Rectangle<int> bounds) override {}
+
+  void drawGridLine(juce::Graphics &g, const cmp::GridLine &grid_line,
+                    const bool grid_on) override {}
+
+  void drawGridLabels(juce::Graphics &g, const cmp::LabelVector &x_axis_labels,
+                      const cmp::LabelVector &y_axis_labels) override {}
+
+  void drawLegendBackground(juce::Graphics &g,
+                            const juce::Rectangle<int> &legend_bound) override {}
+
+  void drawSpread(juce::Graphics &g, const cmp::GraphLine *first_graph,
+                  const cmp::GraphLine *second_graph,
+                  const juce::Colour &spread_colour) override {}
+
+  void drawTraceLabel(juce::Graphics &g, const cmp::Label &x_label,
+                      const cmp::Label &y_label,
+                      const juce::Rectangle<int> bound) override {}
+
+};
+/* Get vector of sine wave. */
+template <class ValueType>
+std::vector<ValueType> generateSineWaveVector(const std::size_t length,
+                                              ValueType min, ValueType max,
+                                              const ValueType num_periods,
+                                              ValueType phase = 0) {
+  std::vector<float> retval(length);
+
+  auto dx =
+      (juce::MathConstants<ValueType>::twoPi * num_periods) / ValueType(length);
+
+  cmp::iota_delta<ValueType>(
+      retval.begin(), retval.end(), phase, dx, [&](ValueType x) {
+        return min + (((std::sin(x) + ValueType(1.0)) * ValueType(0.5)) *
+                      (max - min));
+      });
+
+  return retval;
+};
+
 
 //==============================================================================
 WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
@@ -60,6 +109,7 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize(700, 250);
+    startTimerHz(30);
 
     setLookAndFeel(&lookAndFeel);
 
@@ -203,12 +253,33 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
     addAndMakeVisible(outputMixLabel);
     outputMixLabel.setText("MIX:", NotificationType::dontSendNotification);
     outputMixLabel.setFont(displayFont);
-}
 
+    addAndMakeVisible(output_plot);
+    static CWPlotLookAndFeel plot_look; // TODO(cw):Fix this
+    output_plot.setLookAndFeel(&plot_look);
+    output_plot.setColour(cmp::Plot::ColourIds::background_colour, juce::Colours::black);
+    output_plot.setColour(cmp::Plot::ColourIds::frame_colour, juce::Colours::black);
+
+    std::vector<std::vector<float>> x = {{1,2,3,4,5}};
+    std::vector<std::vector<float>> y = {{1,2,3,4,5}};
+    output_plot.plot(y, x);
+}
 WahmbulanceProcessorEditor::~WahmbulanceProcessorEditor() {
 }
 
+
 //==============================================================================
+void WahmbulanceProcessorEditor::timerCallback() {
+    std::vector<std::vector<float>> y = {{1,2,3,4,5}};
+    for (auto &i : y) {
+        for (auto &j : i) {
+            j = j*this->outputGainSlider.getValue();
+        }
+    }
+    output_plot.realTimePlot(y);
+
+}
+
 void WahmbulanceProcessorEditor::paint(Graphics &g) {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
@@ -273,4 +344,6 @@ void WahmbulanceProcessorEditor::resized() {
     envelopeReleaseMsValueLabel.setBounds(DISPLAY_START_X + VALUE_OFFSET + COL_OFFSET, DISPLAY_START_Y + ROW_OFFSET * 2, COL_OFFSET / 2, 16);
     outputMixLabel.setBounds(DISPLAY_START_X + COL_OFFSET, DISPLAY_START_Y + ROW_OFFSET * 3, COL_OFFSET / 2, 16);
     outputMixValueLabel.setBounds(DISPLAY_START_X + COL_OFFSET + VALUE_OFFSET, DISPLAY_START_Y + ROW_OFFSET * 3, COL_OFFSET / 2, 16);
+
+    output_plot.setBounds(DISPLAY_START_X - 50, DISPLAY_START_Y+ ROW_OFFSET*4, 252*1.33, 85);
 }

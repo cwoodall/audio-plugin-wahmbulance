@@ -2,6 +2,8 @@
 
 #include "CWLookAndFeel.h"
 #include "PluginProcessor.h"
+#include <cmp_plot.h>
+
 
 using namespace std;
 using namespace juce;
@@ -11,7 +13,7 @@ enum RadioButtonIds {
 };
 
 //==============================================================================
-class WahmbulanceProcessorEditor : public juce::AudioProcessorEditor {
+class WahmbulanceProcessorEditor : public juce::AudioProcessorEditor, private Timer {
 public:
     explicit WahmbulanceProcessorEditor(WahmbulanceProcessor &);
     ~WahmbulanceProcessorEditor() override;
@@ -21,6 +23,7 @@ public:
     void resized() override;
 
     void paintOverChildren(Graphics &) override;
+    void timerCallback() override;
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -76,8 +79,9 @@ private:
     unique_ptr<Drawable> debugOverlay;
     Font displayFont;
     Font mainFont;
-    
+
     CWLookAndFeel lookAndFeel;
 
+    cmp::Plot output_plot;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WahmbulanceProcessorEditor)
 };
