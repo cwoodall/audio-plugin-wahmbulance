@@ -82,6 +82,9 @@ private:
 
     CWLookAndFeel lookAndFeel;
 
-    cmp::Plot output_plot;
+    cmp::SemiLogX output_plot;
+    std::vector<float> output_plot_freq_values;
+    std::vector<std::vector<float>> output_plot_y_values;
+    std::vector<std::vector<float>> output_plot_x_values;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WahmbulanceProcessorEditor)
 };

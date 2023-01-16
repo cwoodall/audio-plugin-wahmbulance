@@ -13,12 +13,12 @@ WahmbulanceProcessor::WahmbulanceProcessor()
                          .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
     ) {
-    addParameter(filterStartingFreqHz = new juce::AudioParameterFloat("filterStartingFreqHz", "Starting Frequency Hz", 10.0f, 10000.0f, 100.0f)); // [2]
-    addParameter(filterResonance = new juce::AudioParameterFloat("filterResonance", "Resonance", 0.1f, 20.0f, 2)); // [2]
-    addParameter(filterRangeHz = new juce::AudioParameterFloat("filterRangeHz", "Range", -20000.0f, 20000.f, 1000.f));
-    addParameter(envelopeSensitivity = new juce::AudioParameterFloat("envelopeSensitivity", "Envelope Sensitivity", 0.f, 5.f, 1.f));
-    addParameter(envelopeAttackMs = new juce::AudioParameterFloat("envelopeAttackMs", "Envelope Attack", .1f, 500.f, 5.f));
-    addParameter(envelopeReleaseMs = new juce::AudioParameterFloat("envelopeReleaseMs", "Envelope Release", .1f, 500.f, 100.f));
+    addParameter(filterStartingFreqHz = new juce::AudioParameterFloat("filterStartingFreqHz", "Starting Frequency Hz", juce::NormalisableRange<float>(10.0f, 10000.0f, 1.0f, .3f), 100.0f)); // [2]
+    addParameter(filterResonance = new juce::AudioParameterFloat("filterResonance", "Resonance", juce::NormalisableRange<float>(.1f, 20.0f, .1f, 1.0f), 2)); // [2]
+    addParameter(filterRangeHz = new juce::AudioParameterFloat("filterRangeHz", "Range", juce::NormalisableRange<float>(-20000.0f, 20000.f, 1.f, .3f, true), 1000.f));
+    addParameter(envelopeSensitivity = new juce::AudioParameterFloat("envelopeSensitivity", "Envelope Sensitivity", 0.f, 10.f, 1.f));
+    addParameter(envelopeAttackMs = new juce::AudioParameterFloat("envelopeAttackMs", "Envelope Attack", juce::NormalisableRange<float>(.1f, 500.f, .1f, .3f), 5.f));
+    addParameter(envelopeReleaseMs = new juce::AudioParameterFloat("envelopeReleaseMs", "Envelope Release", juce::NormalisableRange<float>(.1f, 500.f, .1f, .3f), 100.f));
     addParameter(filterType = new juce::AudioParameterChoice("filterType", "Filter Type", { "Lowpass", "Bandpass", "Highpass" }, 0));
     addParameter(outputMix = new juce::AudioParameterFloat("outputMix", "Mix", 0.f, 1.f, .5f));
     addParameter(outputGain = new juce::AudioParameterFloat("outputGain", "Gain", 0.0f, 1.0f, 0.5f)); // [2]
@@ -173,7 +173,10 @@ void WahmbulanceProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         for (size_t i = 0; i < num_samples; i++) {
             cutoff_freqs[i] = filterCutoffHzCopy
                               + envelopeSensitivityCopy * envelope_outs[i] * filterRangeCopy; // Make programmable
-            cutoff_freqs[i] = clip<float>(cutoff_freqs[i], .1f, sampleRateHz / 2.0f - .1f);
+            auto stop_freq = clip<float>(filterCutoffHzCopy + filterRangeCopy, 5, sampleRateHz / 2.0f - .1f);
+            auto min_freq = filterRangeCopy < 0 ? stop_freq : 5;
+            auto max_freq = filterRangeCopy >= 0 ? stop_freq : (sampleRateHz / 2.0f - .1f);
+            cutoff_freqs[i] = clip<float>(cutoff_freqs[i], min_freq, max_freq);
         }
         filter[channel].setType(filter_type_copy);
         filter[channel].step(num_samples, channelSamples, &cutoff_freqs[0], &qs[0], channelSamples);
@@ -181,9 +184,11 @@ void WahmbulanceProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         for (size_t i = 0; i < num_samples; i++) {
             channelSamples[i] = (mix_copy * channelSamples[i] + (1 - mix_copy) * signal_copy[i]) * gain_copy;
         }
+        cutoff_average_freq = reduce(cutoff_freqs.begin(), cutoff_freqs.end())/ cutoff_freqs.size();
     }
 }
 
+float WahmbulanceProcessor::getCutoffAverageFreq( ) { return cutoff_average_freq; }
 //==============================================================================
 bool WahmbulanceProcessor::hasEditor() const {
     return true; // (change this to false if you choose to not supply an editor)

@@ -1,10 +1,12 @@
 #include "PluginEditor.h"
 #include "BinaryData.h"
+#include "CWDspMath.h"
 #include "PluginProcessor.h"
+#include <cmp_lookandfeel.h>
+#include <cmp_plot.h>
+#include <complex>
 #include <tuple>
 #include <vector>
-#include <cmp_plot.h>
-#include <cmp_lookandfeel.h>
 
 using namespace std;
 using namespace juce;
@@ -22,51 +24,76 @@ using namespace juce;
 #define PLUGIN_ORIGINAL_KNOB_WIDTH (53)
 
 class CWPlotLookAndFeel : public cmp::PlotLookAndFeel {
-  void drawBackground(juce::Graphics& g,
-                      const juce::Rectangle<int>& bound) override {
-    g.setColour(juce::Colours::black);
-  };
+    void drawBackground(juce::Graphics &g,
+                        const juce::Rectangle<int> &bound) override {
+        g.setColour(juce::Colours::black);
+    };
 
-  void drawFrame(juce::Graphics &g, const juce::Rectangle<int> bounds) override {}
+    void drawFrame(juce::Graphics &g, const juce::Rectangle<int> bounds) override {}
 
-  void drawGridLine(juce::Graphics &g, const cmp::GridLine &grid_line,
-                    const bool grid_on) override {}
+    void drawGridLine(juce::Graphics &g, const cmp::GridLine &grid_line, const bool grid_on) override {}
 
-  void drawGridLabels(juce::Graphics &g, const cmp::LabelVector &x_axis_labels,
-                      const cmp::LabelVector &y_axis_labels) override {}
+    void drawGridLabels(juce::Graphics &g, const cmp::LabelVector &x_axis_labels, const cmp::LabelVector &y_axis_labels) override {}
 
-  void drawLegendBackground(juce::Graphics &g,
-                            const juce::Rectangle<int> &legend_bound) override {}
+    void drawLegendBackground(juce::Graphics &g,
+                              const juce::Rectangle<int> &legend_bound) override {}
 
-  void drawSpread(juce::Graphics &g, const cmp::GraphLine *first_graph,
-                  const cmp::GraphLine *second_graph,
-                  const juce::Colour &spread_colour) override {}
+    void drawSpread(juce::Graphics &g, const cmp::GraphLine *first_graph, const cmp::GraphLine *second_graph, const juce::Colour &spread_colour) override {}
 
-  void drawTraceLabel(juce::Graphics &g, const cmp::Label &x_label,
-                      const cmp::Label &y_label,
-                      const juce::Rectangle<int> bound) override {}
-
+    void drawTraceLabel(juce::Graphics &g, const cmp::Label &x_label, const cmp::Label &y_label, const juce::Rectangle<int> bound) override {}
 };
 /* Get vector of sine wave. */
 template <class ValueType>
-std::vector<ValueType> generateSineWaveVector(const std::size_t length,
-                                              ValueType min, ValueType max,
-                                              const ValueType num_periods,
-                                              ValueType phase = 0) {
-  std::vector<float> retval(length);
+std::vector<ValueType> generate_frequencies(const std::size_t length,
+                                            ValueType min,
+                                            ValueType max) {
+    std::vector<ValueType> retval(length);
 
-  auto dx =
-      (juce::MathConstants<ValueType>::twoPi * num_periods) / ValueType(length);
+    auto start = log10(min);
+    auto stop = log10(max);
+    auto dx = (stop - start) / length;
 
-  cmp::iota_delta<ValueType>(
-      retval.begin(), retval.end(), phase, dx, [&](ValueType x) {
-        return min + (((std::sin(x) + ValueType(1.0)) * ValueType(0.5)) *
-                      (max - min));
-      });
-
-  return retval;
+    auto last_x = min;
+    for (auto &x : retval) {
+        x = pow(10.0f, log10(last_x) + dx);
+        last_x = x;
+    }
+    return retval;
 };
 
+template <typename ValueType>
+ValueType second_order_filter_gain(ValueType freq, ValueType fc, ValueType q, VariableFreqBiquadFilter::Type type) {
+    std::complex<ValueType> sn = std::complex<ValueType>(1.0i) * freq / fc;
+    switch (type) {
+        case VariableFreqBiquadFilter::Type::LOWPASS: {
+            std::complex<ValueType> value = 1.0f / (sn * sn + sn / q + 1.0f);
+            return static_cast<ValueType>(std::abs(value));
+        }
+        case VariableFreqBiquadFilter::Type::BANDPASS: {
+            std::complex<ValueType> value = (sn / q) / (sn * sn + sn / q + 1.0f);
+            return static_cast<ValueType>(std::abs(value));
+        }
+        case VariableFreqBiquadFilter::Type::HIGHPASS: {
+            std::complex<ValueType> value = (sn * sn) / (sn * sn + sn / q + 1.0f);
+            return static_cast<ValueType>(std::abs(value));
+        }
+    }
+}
+
+template <typename ValueType, typename Iter = typename std::vector<ValueType>::const_iterator>
+std::vector<ValueType> generate_frequency_gains(std::vector<ValueType> const &freqs,
+                                                ValueType fc,
+                                                ValueType resonance,
+                                                VariableFreqBiquadFilter::Type type) {
+    std::vector<float> retval(freqs.size());
+
+    size_t idx = 0;
+    for (const auto freq : freqs) {
+        retval[idx++] = second_order_filter_gain(freq, fc, resonance, type);
+    }
+
+    return retval;
+};
 
 //==============================================================================
 WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
@@ -98,8 +125,8 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
       background_text(Drawable::createFromImageData(BinaryData::background_text_png, BinaryData::background_text_pngSize)),
       overlay(Drawable::createFromImageData(BinaryData::shadow_overlay_png, BinaryData::shadow_overlay_pngSize)),
       debugOverlay(Drawable::createFromImageData(BinaryData::debug_overlay_png, BinaryData::debug_overlay_pngSize)),
-      displayFont(Typeface::createSystemTypefaceFor(BinaryData::DSEG14ModernMiniRegular_ttf,
-                                                    BinaryData::DSEG14ModernMiniRegular_ttfSize)),
+      displayFont(Typeface::createSystemTypefaceFor(BinaryData::FiraMonoRegular_ttf,
+                                                    BinaryData::FiraMonoRegular_ttfSize)),
       mainFont(Typeface::createSystemTypefaceFor(BinaryData::FiraMonoRegular_ttf,
                                                  BinaryData::FiraMonoRegular_ttfSize)),
 
@@ -162,7 +189,7 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
 
     filterTypeAttachment.sendInitialUpdate();
     // Setup display section
-    displayFont.setHeight(12);
+    displayFont.setHeight(14);
 
     addAndMakeVisible(filterStartingFreqHzValueLabel);
     filterStartingFreqHzValueLabel.setFont(displayFont);
@@ -229,13 +256,13 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
     };
 
     addAndMakeVisible(filterStartingFreqHzLabel);
-    filterStartingFreqHzLabel.setText("FREQ!(HZ):", NotificationType::dontSendNotification);
+    filterStartingFreqHzLabel.setText("FREQ (HZ):", NotificationType::dontSendNotification);
     filterStartingFreqHzLabel.setFont(displayFont);
     addAndMakeVisible(filterRangeHzLabel);
     filterRangeHzLabel.setText("RANGE(HZ):", NotificationType::dontSendNotification);
     filterRangeHzLabel.setFont(displayFont);
     addAndMakeVisible(filterResonanceLabel);
-    filterResonanceLabel.setText("RESN!!:", NotificationType::dontSendNotification);
+    filterResonanceLabel.setText("RESN  :", NotificationType::dontSendNotification);
     filterResonanceLabel.setFont(displayFont);
 
     addAndMakeVisible(envelopeSensitivityLabel);
@@ -260,24 +287,45 @@ WahmbulanceProcessorEditor::WahmbulanceProcessorEditor(WahmbulanceProcessor &p)
     output_plot.setColour(cmp::Plot::ColourIds::background_colour, juce::Colours::black);
     output_plot.setColour(cmp::Plot::ColourIds::frame_colour, juce::Colours::black);
 
-    std::vector<std::vector<float>> x = {{1,2,3,4,5}};
-    std::vector<std::vector<float>> y = {{1,2,3,4,5}};
-    output_plot.plot(y, x);
+    output_plot_freq_values = generate_frequencies<float>(1024, 1, 26000);
+
+    output_plot_x_values = {
+        output_plot_freq_values, output_plot_freq_values, output_plot_freq_values
+    };
+
+    output_plot_y_values = {
+        generate_frequency_gains<float>(output_plot_freq_values, 100, 20, VariableFreqBiquadFilter::Type::LOWPASS),
+        generate_frequency_gains<float>(output_plot_freq_values, 100, 20, VariableFreqBiquadFilter::Type::LOWPASS),
+        generate_frequency_gains<float>(output_plot_freq_values, 100, 20, VariableFreqBiquadFilter::Type::LOWPASS)
+    };
+    output_plot.setDownsamplingType(cmp::DownsamplingType::no_downsampling);
+
+    output_plot.plot(output_plot_y_values, output_plot_x_values);
 }
 WahmbulanceProcessorEditor::~WahmbulanceProcessorEditor() {
 }
 
-
 //==============================================================================
 void WahmbulanceProcessorEditor::timerCallback() {
-    std::vector<std::vector<float>> y = {{1,2,3,4,5}};
-    for (auto &i : y) {
-        for (auto &j : i) {
-            j = j*this->outputGainSlider.getValue();
-        }
-    }
-    output_plot.realTimePlot(y);
+    auto start_freq = this->processorRef.filterStartingFreqHz->get();
+    auto range = this->processorRef.filterRangeHz->get();
+    auto q = this->processorRef.filterResonance->get();
+    auto stop_freq = clip<float>(start_freq + range, 5, 20000);
+    auto average_autowah_freq_envelope = processorRef.getCutoffAverageFreq();
+    auto filter_type = static_cast<VariableFreqBiquadFilter::Type>(
+        processorRef.filterType->getIndex());
+    output_plot_y_values[0] = generate_frequency_gains<float>(output_plot_freq_values, start_freq, q, filter_type);
+    output_plot_y_values[1] = generate_frequency_gains<float>(output_plot_freq_values, stop_freq, q, filter_type);
+    output_plot_y_values[2] = generate_frequency_gains<float>(output_plot_freq_values, average_autowah_freq_envelope, q, filter_type);
 
+    auto max_values = std::max_element(output_plot_y_values[0].begin(), output_plot_y_values[0].end());
+    const float YLIM_PADDING = .2f;
+    output_plot.yLim(0 - YLIM_PADDING, *max_values + YLIM_PADDING);
+    output_plot.realTimePlot({
+        output_plot_y_values[0],
+        output_plot_y_values[1],
+        output_plot_y_values[2]
+    });
 }
 
 void WahmbulanceProcessorEditor::paint(Graphics &g) {
@@ -345,5 +393,5 @@ void WahmbulanceProcessorEditor::resized() {
     outputMixLabel.setBounds(DISPLAY_START_X + COL_OFFSET, DISPLAY_START_Y + ROW_OFFSET * 3, COL_OFFSET / 2, 16);
     outputMixValueLabel.setBounds(DISPLAY_START_X + COL_OFFSET + VALUE_OFFSET, DISPLAY_START_Y + ROW_OFFSET * 3, COL_OFFSET / 2, 16);
 
-    output_plot.setBounds(DISPLAY_START_X - 50, DISPLAY_START_Y+ ROW_OFFSET*4, 252*1.33, 85);
+    output_plot.setBounds(DISPLAY_START_X - 30, DISPLAY_START_Y + ROW_OFFSET * 4, 296, 85);
 }

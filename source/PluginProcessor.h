@@ -34,8 +34,11 @@ public:
 
     void getStateInformation(juce::MemoryBlock &destData) override;
     void setStateInformation(const void *data, int sizeInBytes) override;
+    
+    float getCutoffAverageFreq();
 
 private:
+    float cutoff_average_freq;
     juce::AudioParameterFloat *filterStartingFreqHz;
     juce::AudioParameterFloat *filterResonance;
     juce::AudioParameterFloat *filterRangeHz;
@@ -47,7 +50,6 @@ private:
 
     juce::AudioParameterFloat *outputGain;
     juce::AudioParameterFloat *outputMix;
-
     float sampleRateHz;
     std::vector<float> cutoff_freqs;
     std::vector<float> qs;
