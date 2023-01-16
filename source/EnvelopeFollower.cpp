@@ -29,5 +29,6 @@ void EnvelopeFollower::step(size_t n, const float in[], float out[]) {
     for (size_t i = 0; i < n; i++) {
         const float absIn = std::fabs(in[i]);
         envelope += (absIn - envelope) * (absIn > envelope ? attackCoef : releaseCoef);
+        out[i] = envelope;
     }
 }
