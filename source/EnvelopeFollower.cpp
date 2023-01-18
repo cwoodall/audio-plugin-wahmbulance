@@ -20,8 +20,8 @@ void EnvelopeFollower::setReleaseTimeConstant(float releaseMs) {
 }
 
 void EnvelopeFollower::calculateGains() {
-    attackCoef = 1.0f - std::expf(-1.0f / (attackMs * sampleRate * 0.001f));
-    releaseCoef = 1.0f - std::expf(-1.0f / (releaseMs * sampleRate * 0.001f));
+    attackCoef = 1.0f - std::exp(-1.0f / (attackMs * sampleRate * 0.001f));
+    releaseCoef = 1.0f - std::exp(-1.0f / (releaseMs * sampleRate * 0.001f));
 }
 
 void EnvelopeFollower::step(size_t n, const float in[], float out[]) {
