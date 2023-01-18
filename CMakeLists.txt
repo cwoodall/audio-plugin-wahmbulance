@@ -4,12 +4,13 @@
 cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 
 # Change this to the name of your plugin
 # This cannot have spaces (but PRODUCT_NAME can)
 set(PLUGIN_PROJECT_NAME "Wahmbulance")
 
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 # Set the plugin formats you'll be building here.
 # Valid formats: AAX Unity VST AU AUv3 Standalone
 set(FORMATS Standalone VST3)
