@@ -1,5 +1,5 @@
 # 3.21 is bundled in VSCode 2022
-# https://docs.microsoft.com/en-us/visualstudio/ReleaseMs/2022/release-notes
+# https://docs.microsoft.com/en-us/visualstudio/Releases/2022/release-notes
 # 3.21 is also bundled in CLion as of 2021.3
 cmake_minimum_required(VERSION 3.21)
 
