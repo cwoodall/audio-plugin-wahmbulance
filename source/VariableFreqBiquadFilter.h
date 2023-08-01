@@ -4,17 +4,23 @@
 #include <array>
 
 /**
- * @brief 
+ * @brief A Variable Frequency Biquad Filter which is capable of being a 2nd order lowpass, bandpass or highpass filter.
  * 
- * https://github.com/cwoodall/py-audio-effects-autowah/blob/main/autowah/variable_cutoff_biquad_filter.py
+ * The original implementation was adopted from:
+ * 
+ * - https://github.com/cwoodall/py-audio-effects-autowah/blob/main/autowah/variable_cutoff_biquad_filter.py
  */
 class VariableFreqBiquadFilter {
 public:
+    /** 
+     * Specify the types of biquad filter gains that can be computed.
+     */
     enum class Type: unsigned {
         LOWPASS = 0,
         BANDPASS,
         HIGHPASS
     };
+    
     VariableFreqBiquadFilter();
     
     void setSamplingRate(float sample_rate);
