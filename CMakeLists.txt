@@ -27,7 +27,7 @@ set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
 # Enable to build universal binaries on macOS, increasing build time
 # This only affects local builds, GitHub actions always builds Universals
-# set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
+set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Support macOS down to High Sierra")
 
 # Adds all the module sources so they appear correctly in the IDE
@@ -120,12 +120,6 @@ target_link_libraries("${PLUGIN_PROJECT_NAME}"
     ${JUCE_DEPENDENCIES}
     cmp_plot
     Assets)
-
-# target_link_libraries("${PLUGIN_PROJECT_NAME}"
-#     PUBLIC
-#     juce::juce_recommended_config_flags
-#     juce::juce_recommended_lto_flags
-#     juce::juce_recommended_warning_flags)
 
 # Required for ctest (which is just easier for cross-platform CI)
 # include(CTest) does this too, but adds tons of targets we don't want
