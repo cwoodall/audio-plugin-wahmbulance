@@ -2,13 +2,14 @@
 # https://docs.microsoft.com/en-us/visualstudio/Releases/2022/release-notes
 # 3.21 is also bundled in CLion as of 2021.3
 cmake_minimum_required(VERSION 3.12)
-# set(CMAKE_CXX_STANDARD 20)
-# set(CMAKE_CXX_STANDARD_REQUIRED True)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 
 # Change this to the name of your plugin
 # This cannot have spaces (but PRODUCT_NAME can)
 set(PLUGIN_PROJECT_NAME "Wahmbulance")
+
 
 set(CMAKE_BUILD_TYPE Release)
 # Set the plugin formats you'll be building here.
@@ -114,7 +115,7 @@ target_compile_definitions("${PLUGIN_PROJECT_NAME}"
     JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
     JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
     JUCE_VST3_CAN_REPLACE_VST2=0)
-    
+
 target_link_libraries("${PLUGIN_PROJECT_NAME}"
     PRIVATE
     ${JUCE_DEPENDENCIES}
