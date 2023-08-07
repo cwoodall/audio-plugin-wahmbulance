@@ -1,10 +1,10 @@
 # 3.21 is bundled in VSCode 2022
-# https://docs.microsoft.com/en-us/visualstudio/Releases/2022/release-notes
+# https://docs.microsoft.com/en-us/visualstudio/ReleaseMs/2022/release-notes
 # 3.21 is also bundled in CLion as of 2021.3
 cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 
 # Change this to the name of your plugin
 # This cannot have spaces (but PRODUCT_NAME can)
@@ -18,8 +18,6 @@ set(FORMATS Standalone VST3)
 # Reads in VERSION file and sticks in it CURRENT_VERSION variable
 # Be sure the file has no newlines
 file(STRINGS VERSION CURRENT_VERSION)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # For simplicity, the name of the project is also the name of the target
 project(${PLUGIN_PROJECT_NAME} VERSION ${CURRENT_VERSION})
@@ -35,10 +33,10 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Support macOS down to High
 # Adds all the module sources so they appear correctly in the IDE
 # Must be set before JUCE is added as a sub-dir (or any targets are made)
 # https://github.com/juce-framework/JUCE/commit/6b1b4cf7f6b1008db44411f2c8887d71a3348889
-set_property(GLOBAL PROPERTY USE_FOLDERS YES)
+# set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
 # Create a /Modules directory in the IDE with the JUCE Module code
-option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
+# option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
 
 # JUCE is setup as a submodule in the /JUCE folder
 # Locally, you'll need to run `git submodule update --init --recursive` once
@@ -65,10 +63,9 @@ juce_add_plugin("${PLUGIN_PROJECT_NAME}"
     PRODUCT_NAME "${PLUGIN_PROJECT_NAME}")        # The name of the final executable, which can differ from the target name
 
 # C++20 please
-target_compile_features("${PLUGIN_PROJECT_NAME}" PUBLIC cxx_std_20)
+target_compile_features("${PLUGIN_PROJECT_NAME}" PRIVATE cxx_std_20)
 add_subdirectory(libs/CMP)
-target_compile_features("cmp_plot" PUBLIC cxx_std_20)
-target_compile_features("juceaide" INTERFACE cxx_std_20)
+
 # Manually list all .h and .cpp files for the plugin
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/source/*.h")
 target_sources("${PLUGIN_PROJECT_NAME}" PRIVATE ${SOURCE_FILES})
@@ -116,12 +113,16 @@ target_compile_definitions("${PLUGIN_PROJECT_NAME}"
     JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
     JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
     JUCE_VST3_CAN_REPLACE_VST2=0)
-
+    
 target_link_libraries("${PLUGIN_PROJECT_NAME}"
     PRIVATE
-    ${JUCE_DEPENDENCIES}
-    cmp_plot
-    Assets)
+        ${JUCE_DEPENDENCIES}
+        cmp_plot
+        Assets
+    PUBLIC
+      juce::juce_recommended_config_flags
+      juce::juce_recommended_lto_flags
+      juce::juce_recommended_warning_flags)
 
 # Required for ctest (which is just easier for cross-platform CI)
 # include(CTest) does this too, but adds tons of targets we don't want
