@@ -4,11 +4,14 @@
 cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
+set(CMAKE_CXX_EXTENSIONS OFF)
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 
 # Change this to the name of your plugin
 # This cannot have spaces (but PRODUCT_NAME can)
 set(PLUGIN_PROJECT_NAME "Wahmbulance")
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 set(CMAKE_BUILD_TYPE Release)
 # Set the plugin formats you'll be building here.
@@ -62,8 +65,6 @@ juce_add_plugin("${PLUGIN_PROJECT_NAME}"
     FORMATS "${FORMATS}"
     PRODUCT_NAME "${PLUGIN_PROJECT_NAME}")        # The name of the final executable, which can differ from the target name
 
-# C++20 please
-target_compile_features("${PLUGIN_PROJECT_NAME}" PRIVATE cxx_std_20)
 add_subdirectory(libs/CMP)
 
 # Manually list all .h and .cpp files for the plugin
