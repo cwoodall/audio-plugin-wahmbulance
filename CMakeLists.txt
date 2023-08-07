@@ -2,10 +2,11 @@
 # https://docs.microsoft.com/en-us/visualstudio/ReleaseMs/2022/release-notes
 # 3.21 is also bundled in CLion as of 2021.3
 cmake_minimum_required(VERSION 3.12)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 
 # Change this to the name of your plugin
 # This cannot have spaces (but PRODUCT_NAME can)
