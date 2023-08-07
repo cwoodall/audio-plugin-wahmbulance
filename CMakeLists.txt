@@ -68,7 +68,7 @@ juce_add_plugin("${PLUGIN_PROJECT_NAME}"
 target_compile_features("${PLUGIN_PROJECT_NAME}" PUBLIC cxx_std_20)
 add_subdirectory(libs/CMP)
 target_compile_features("cmp_plot" PUBLIC cxx_std_20)
-
+target_compile_features("juceaide" INTERFACE cxx_std_20)
 # Manually list all .h and .cpp files for the plugin
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/source/*.h")
 target_sources("${PLUGIN_PROJECT_NAME}" PRIVATE ${SOURCE_FILES})
