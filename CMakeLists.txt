@@ -10,7 +10,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 # This cannot have spaces (but PRODUCT_NAME can)
 set(PLUGIN_PROJECT_NAME "Wahmbulance")
 
-
 set(CMAKE_BUILD_TYPE Release)
 # Set the plugin formats you'll be building here.
 # Valid formats: AAX Unity VST AU AUv3 Standalone
@@ -19,6 +18,8 @@ set(FORMATS Standalone VST3)
 # Reads in VERSION file and sticks in it CURRENT_VERSION variable
 # Be sure the file has no newlines
 file(STRINGS VERSION CURRENT_VERSION)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # For simplicity, the name of the project is also the name of the target
 project(${PLUGIN_PROJECT_NAME} VERSION ${CURRENT_VERSION})
@@ -34,10 +35,10 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Support macOS down to High
 # Adds all the module sources so they appear correctly in the IDE
 # Must be set before JUCE is added as a sub-dir (or any targets are made)
 # https://github.com/juce-framework/JUCE/commit/6b1b4cf7f6b1008db44411f2c8887d71a3348889
-# set_property(GLOBAL PROPERTY USE_FOLDERS YES)
+set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
 # Create a /Modules directory in the IDE with the JUCE Module code
-# option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
+option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
 
 # JUCE is setup as a submodule in the /JUCE folder
 # Locally, you'll need to run `git submodule update --init --recursive` once
@@ -64,9 +65,9 @@ juce_add_plugin("${PLUGIN_PROJECT_NAME}"
     PRODUCT_NAME "${PLUGIN_PROJECT_NAME}")        # The name of the final executable, which can differ from the target name
 
 # C++20 please
-target_compile_features("${PLUGIN_PROJECT_NAME}" PRIVATE cxx_std_20)
+target_compile_features("${PLUGIN_PROJECT_NAME}" PUBLIC cxx_std_20)
 add_subdirectory(libs/CMP)
-target_compile_features("cmp_plot" PRIVATE cxx_std_20)
+target_compile_features("cmp_plot" PUBLIC cxx_std_20)
 
 # Manually list all .h and .cpp files for the plugin
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/source/*.h")
