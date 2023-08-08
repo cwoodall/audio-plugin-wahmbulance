@@ -75,10 +75,10 @@ jobs:
         echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PROJECT_NAME }}.appex" >> $GITHUB_ENV
         echo "PRODUCT_NAME=${{ env.PROJECT_NAME }}-$VERSION-${{ matrix.name }}" >> $GITHUB_ENV
 
-    - name: ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: v2-${{ matrix.os }}-${{ matrix.type }}
+    # - name: ccache
+    #   uses: hendrikmuhs/ccache-action@v1.2
+    #   with:
+    #     key: v2-${{ matrix.os }}-${{ matrix.type }}
 
     # - name: Import Certificates (macOS)
     #   uses: apple-actions/import-codesign-certs@v1
@@ -89,7 +89,7 @@ jobs:
 
     - name: Configure
       shell: bash
-      run: CXXFLAGS="-std=c++20 -stdlib=libc++" cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
+      run: CXXFLAGS="-std=c++20 -stdlib=libc++" cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
 
     - name: Build
       shell: bash
