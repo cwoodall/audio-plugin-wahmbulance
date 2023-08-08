@@ -6,8 +6,12 @@ cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -stdlib=libc++" )
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
+if(UNIX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
+endif()
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Change this to the name of your plugin
