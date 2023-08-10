@@ -31,12 +31,22 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             pluginval-binary: ./pluginval
+            cxx_flags: -std=c++20 -stdlib=libc++
+            cmake_args: ""
+
+            # TODO: use this for combining the Configure steps by making a new variable
           - name: macOS
             os: macos-12
             pluginval-binary: pluginval.app/Contents/MacOS/pluginval
+            cxx_flags: -std=c++20
+            cmake_args: ""
+            
           - name: Windows
             os: windows-latest
             pluginval-binary: ./pluginval.exe
+            cmake_args: -A x64
+            cxx_flags: -std=c++20
+
 
     steps:
     - name: Setup python
@@ -87,15 +97,10 @@ jobs:
     #     p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
     #     p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
 
-    - name: Configure (macOS, Windows)
+## TODO TURN BACK ON CACHING
+    - name: Configure (macOS, Windows, Linux)
       shell: bash
-      if: ${{ matrix.name != 'Linux' }}
-      run: CXXFLAGS="-std=c++20" cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
-
-    - name: Configure (Linux)
-      if: ${{ matrix.name == 'Linux' }}
-      shell: bash
-      run: CXXFLAGS="-std=c++20 -stdlib=libc++" cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
+      run: CXXFLAGS="${{ matrix.cxx_flags }}" cmake -B ${{ env.BUILD_DIR }} -G Ninja ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
 
     - name: Build
       shell: bash
