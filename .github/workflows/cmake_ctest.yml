@@ -34,7 +34,6 @@ jobs:
             cxx_flags: -std=c++20 -stdlib=libc++
             cmake_args: ""
 
-            # TODO: use this for combining the Configure steps by making a new variable
           - name: macOS
             os: macos-12
             pluginval-binary: pluginval.app/Contents/MacOS/pluginval
@@ -87,10 +86,10 @@ jobs:
         echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PROJECT_NAME }}.appex" >> $GITHUB_ENV
         echo "PRODUCT_NAME=${{ env.PROJECT_NAME }}-$VERSION-${{ matrix.name }}" >> $GITHUB_ENV
 
-    # - name: ccache
-    #   uses: hendrikmuhs/ccache-action@v1.2
-    #   with:
-    #     key: v2-${{ matrix.os }}-${{ matrix.type }}
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: v2-${{ matrix.os }}-${{ matrix.type }}
 
     # - name: Import Certificates (macOS)
     #   uses: apple-actions/import-codesign-certs@v1
@@ -102,12 +101,12 @@ jobs:
     - name: Configure (macOS, Linux)
       if: ${{ matrix.name != 'Windows' }}
       shell: bash
-      run: CXXFLAGS="${{ matrix.cxx_flags }}" cmake -B ${{ env.BUILD_DIR }} -G Ninja ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
+      run: CXXFLAGS="${{ matrix.cxx_flags }}" cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
 
     - name: Configure (Windows)
       if: ${{ matrix.name == 'Windows' }}
       shell: powershell
-      run: cmake -B ${{ env.BUILD_DIR }} -G Ninja ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DPython3_EXECUTABLE=${{ steps.cp310.outputs.python-path }} .
+      run: cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DPython3_EXECUTABLE=${{ steps.cp310.outputs.python-path }} .
 
     - name: Build
       shell: bash
@@ -138,10 +137,10 @@ jobs:
       working-directory: ${{ env.BUILD_DIR }}
       run: |
         # add the icns as its own icon resource (meta!)
-        sips -i ../packaging/pamplejuce.icns
+        sips -i ../packaging/wahmbulance.icns
 
         # Grab the resource, put in tempfile
-        DeRez -only icns ../packaging/pamplejuce.icns > /tmp/icons
+        DeRez -only icns ../packaging/wahmbulance.icns > /tmp/icons
 
         # Stuff the resource into the strange Icon? file's resource fork
         Rez -a /tmp/icons -o ${{ env.VST3_PATH }}/Icon$'\r'
