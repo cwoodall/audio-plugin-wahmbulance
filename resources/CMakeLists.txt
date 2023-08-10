@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.21)
 # project(Wahmbulance_Resources)
 
 set(Python3_FIND_UNVERSIONED_NAMES NEVER)
-find_package(Python3 REQUIRED)
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
 if(NOT Python3_Interpreter_FOUND)
     message(FATAL_ERROR "Python3 is needed, please install it first")
 endif()

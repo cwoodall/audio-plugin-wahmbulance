@@ -40,11 +40,11 @@ jobs:
             pluginval-binary: pluginval.app/Contents/MacOS/pluginval
             cxx_flags: -std=c++20
             cmake_args: ""
-            
+
           - name: Windows
             os: windows-latest
             pluginval-binary: ./pluginval.exe
-            cmake_args: -A x64
+            cmake_args: ""
             cxx_flags: -std=c++20
 
 
@@ -97,7 +97,6 @@ jobs:
     #     p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
     #     p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
 
-## TODO TURN BACK ON CACHING
     - name: Configure (macOS, Windows, Linux)
       shell: bash
       run: CXXFLAGS="${{ matrix.cxx_flags }}" cmake -B ${{ env.BUILD_DIR }} -G Ninja ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
@@ -152,7 +151,7 @@ jobs:
         
         # Create directories for the dmg symlinks
         sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/VST3
-        ln -s /Library/Audio/Plug-Ins/Components "packaging/dmg/Your Mac's Component folder"
+        # ln -s /Library/Audio/Plug-Ins/Components "packaging/dmg/Your Mac's Component folder"
         ln -s /Library/Audio/Plug-Ins/VST3 "packaging/dmg/Your Mac's VST3 folder"
         mv "${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3" packaging/dmg
         # mv "${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component" packaging/dmg

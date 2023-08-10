@@ -12,19 +12,19 @@ class EnvelopeFollower {
 public:
     EnvelopeFollower();
 
-    void setSamplingRate(float sampleRate);
-    void setAttackTimeConstant(float attackMs);
-    void setReleaseTimeConstant(float releaseMs);
+    void setSamplingRate(float sample_rate);
+    void setAttackTimeConstant(float attack_ms);
+    void setReleaseTimeConstant(float release_ms);
 
     void step(size_t n, const float in[], float out[]);
 
 private:
-    float envelope;
-    float attackMs;
-    float releaseMs;
-    float  sampleRate;
+    float envelope_;
+    float attack_ms_;
+    float release_ms_;
+    float  sample_rate_;
 
-    float attackCoef;
-    float releaseCoef;
+    float attack_coef_;
+    float release_coef_;
     void calculateGains();
 };
