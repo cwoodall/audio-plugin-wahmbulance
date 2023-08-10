@@ -106,8 +106,8 @@ jobs:
 
     - name: Configure (Windows)
       if: ${{ matrix.name == 'Windows' }}
-      shell: bash
-      run: CXXFLAGS="${{ matrix.cxx_flags }}" cmake -B ${{ env.BUILD_DIR }} -G Ninja ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DPython3_EXECUTABLE=${{ steps.cp310.outputs.python-path }} .
+      shell: powershell
+      run: cmake -B ${{ env.BUILD_DIR }} -G Ninja ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DPython3_EXECUTABLE=${{ steps.cp310.outputs.python-path }} .
 
     - name: Build
       shell: bash
