@@ -52,8 +52,10 @@ jobs:
     - name: Setup python
       if: ${{ matrix.name == 'Windows' }}
       uses: actions/setup-python@v4
+      id: cp310
       with:
         python-version: '3.10' 
+        update-environment: true
       
     - name: Set up Clang
       if: ${{ matrix.name != 'macOS' }}
@@ -100,6 +102,11 @@ jobs:
     - name: Configure (macOS, Windows, Linux)
       shell: bash
       run: CXXFLAGS="${{ matrix.cxx_flags }}" cmake -B ${{ env.BUILD_DIR }} -G Ninja ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
+
+    - name: Configure (Windows)
+      if: ${{ matrix.name == 'Windows' }}
+      shell: bash
+      run: CXXFLAGS="${{ matrix.cxx_flags }}" cmake -B ${{ env.BUILD_DIR }} -G Ninja ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DPython3_ROOT_DIR=${{ steps.cp310.outputs.python-path }} .
 
     - name: Build
       shell: bash
@@ -151,7 +158,7 @@ jobs:
         
         # Create directories for the dmg symlinks
         sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/VST3
-        # ln -s /Library/Audio/Plug-Ins/Components "packaging/dmg/Your Mac's Component folder"
+        ln -s /Library/Audio/Plug-Ins/Components "packaging/dmg/Your Mac's Component folder"
         ln -s /Library/Audio/Plug-Ins/VST3 "packaging/dmg/Your Mac's VST3 folder"
         mv "${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3" packaging/dmg
         # mv "${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component" packaging/dmg
