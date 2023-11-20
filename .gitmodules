@@ -1,7 +1,7 @@
 [submodule "JUCE"]
-	path = JUCE
+	path = libs/JUCE
 	url = https://github.com/juce-framework/JUCE/
-	branch = develop
+	branch = master
 [submodule "libs/CMP"]
 	path = libs/CMP
 	url = https://github.com/franshej/CustomMatPlot.git

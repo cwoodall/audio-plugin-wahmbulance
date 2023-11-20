@@ -1,11 +1,11 @@
 #pragma once
-#include "VariableFreqBiquadFilter.h"
+#include "adjustable_biquad_filter.h"
 #include <array>
 #include <juce_audio_processors/juce_audio_processors.h>
 
 /**
- * @brief 
- * 
+ * @brief
+ *
  * https://github.com/cwoodall/py-audio-effects-autowah/blob/main/autowah/envelope_follower.py
  */
 class EnvelopeFollower {
@@ -22,7 +22,7 @@ private:
     float envelope_;
     float attack_ms_;
     float release_ms_;
-    float  sample_rate_;
+    float sample_rate_;
 
     float attack_coef_;
     float release_coef_;

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BinaryData.h"
+#include <cmp_lookandfeel.h>
+#include <cmp_plot.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
 using namespace juce;
@@ -10,13 +12,13 @@ enum CWColourIds {
     rotaryKnobArcFillReverseColourId = 0x102,
 };
 
-class CWLookAndFeel : public LookAndFeel_V4 {
+class WahmLookAndFeel : public LookAndFeel_V4 {
 public:
-    CWLookAndFeel(const Drawable &knobDrawable,
-                  const Drawable &knobShadowDrawable,
-                  const Drawable &knobTopShadowDrawable) : knob(knobDrawable.createCopy()),
-                                                                 knobShadow(knobShadowDrawable.createCopy()),
-                                                                 knobTopShadow(knobTopShadowDrawable.createCopy()) {
+    WahmLookAndFeel(const Drawable &knobDrawable,
+                    const Drawable &knobShadowDrawable,
+                    const Drawable &knobTopShadowDrawable) : knob(knobDrawable.createCopy()),
+                                                             knobShadow(knobShadowDrawable.createCopy()),
+                                                             knobTopShadow(knobTopShadowDrawable.createCopy()) {
         setColour(TextButton::ColourIds::buttonColourId, Colours::black);
         setColour(ToggleButton::ColourIds::textColourId, Colours::black);
         setColour(ToggleButton::ColourIds::tickColourId, Colours::black);
@@ -109,9 +111,9 @@ public:
 
     template <typename T>
     static Rectangle<float> getSquareCenteredInRectangle(T x,
-                                                               T y,
-                                                               T width,
-                                                               T height) {
+                                                         T y,
+                                                         T width,
+                                                         T height) {
         return getSquareCenteredInRectangle(Rectangle<T>(x, y, width, height));
     }
 
@@ -120,10 +122,55 @@ private:
     std::unique_ptr<Drawable> knobShadow;
     std::unique_ptr<Drawable> knobTopShadow;
 
-    Font getCommonMenuFont()
-    {
+    Font getCommonMenuFont() {
         auto tempFont = Font(Typeface::createSystemTypefaceFor(BinaryData::FiraMonoRegular_ttf, BinaryData::FiraMonoRegular_ttfSize));
         tempFont.setHeight(14);
         return tempFont;
+    }
+};
+
+class CWPlotLookAndFeel : public cmp::PlotLookAndFeel {
+    void drawBackground(juce::Graphics &g,
+                        const juce::Rectangle<int> &bound) override {
+        (void) bound;
+
+        g.setColour(juce::Colours::black);
+    }
+
+    void drawFrame(juce::Graphics &g, const juce::Rectangle<int> bounds) override {
+        (void) (bounds);
+        (void) (g);
+    }
+
+    void drawGridLine(juce::Graphics &g, const cmp::GridLine &grid_line, const bool grid_on) override {
+        (void) (g);
+        (void) (grid_line);
+        (void) (grid_on);
+    }
+
+    void drawGridLabels(juce::Graphics &g, const cmp::LabelVector &x_axis_labels, const cmp::LabelVector &y_axis_labels) override {
+        (void) g;
+        (void) x_axis_labels;
+        (void) y_axis_labels;
+    }
+
+    void drawLegendBackground(juce::Graphics &g,
+                              const juce::Rectangle<int> &legend_bound) override {
+        (void) g;
+        (void) legend_bound;
+    }
+
+    void drawSpread(juce::Graphics &g, const cmp::GraphLine *first_graph, const cmp::GraphLine *second_graph, const juce::Colour &spread_colour) override {
+        (void) (g);
+        (void) (first_graph);
+        (void) (second_graph);
+        (void) (spread_colour);
+    }
+
+    void drawTraceLabel(juce::Graphics &g, const cmp::Label &x_label, const cmp::Label &y_label, const juce::Rectangle<int> bound) override {
+        (void) (g);
+        (void) (x_label);
+        (void) (y_label);
+        (void) (bound);
     }
 };

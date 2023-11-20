@@ -1,8 +1,8 @@
 #pragma once
 
+#include "adjustable_biquad_filter.h"
+#include "envelope_follower.h"
 #include <juce_audio_processors/juce_audio_processors.h>
-#include "VariableFreqBiquadFilter.h"
-#include "EnvelopeFollower.h"
 
 class WahmbulanceProcessor : public juce::AudioProcessor {
 public:
@@ -34,7 +34,7 @@ public:
 
     void getStateInformation(juce::MemoryBlock &destData) override;
     void setStateInformation(const void *data, int sizeInBytes) override;
-    
+
     float getCutoffAverageFreq();
 
 private:
@@ -56,10 +56,10 @@ private:
     std::vector<float> envelope_outs;
     std::vector<float> signal_copy;
 
-    std::vector<VariableFreqBiquadFilter> filter;
+    std::vector<AdjustableBiquadFilter> filter;
     std::vector<EnvelopeFollower> envelope_follower;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WahmbulanceProcessor)
-    
+
     friend class WahmbulanceProcessorEditor;
 };

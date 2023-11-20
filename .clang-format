@@ -1,4 +1,3 @@
-# https://forum.juce.com/t/automatic-juce-like-code-formatting-with-clang-format/31624/20
 ---
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
@@ -55,7 +54,7 @@ SpacesInCStyleCastParentheses: false
 SpacesInContainerLiterals: true
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-Standard: "c++20"
+Standard: c++20
 TabWidth: 4
 UseTab: Never
 ---
@@ -72,3 +71,6 @@ PointerAlignment: Right
 SpacesBeforeTrailingComments: 1
 TabWidth: 4
 UseTab: Never
+---
+Language: Json
+BasedOnStyle: llvm

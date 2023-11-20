@@ -1,7 +1,9 @@
-#include "EnvelopeFollower.h"
-#include "CWDspMath.h"
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include "envelope_follower.h"
+
+#include "dsp_math.h"
+#include <cmath>
+
+using namespace cw::dsp;
 
 EnvelopeFollower::EnvelopeFollower() {
     envelope_ = 0;

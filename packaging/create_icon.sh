@@ -1,6 +1,6 @@
 #!bash
 # From https://www.codingforentrepreneurs.com/blog/create-icns-icons-for-macos-apps/
-input_filepath="icon.png" 
+input_filepath="icon.png"
 output_iconset_name="pamplejuce.iconset"
 mkdir $output_iconset_name
 

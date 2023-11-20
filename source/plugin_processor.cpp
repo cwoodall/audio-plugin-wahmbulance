@@ -1,7 +1,9 @@
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "plugin_processor.h"
+#include "plugin_editor.h"
 
-#include "CWDspMath.h"
+#include "dsp_math.h"
+
+using namespace cw::dsp;
 
 //==============================================================================
 WahmbulanceProcessor::WahmbulanceProcessor()
@@ -129,66 +131,66 @@ bool WahmbulanceProcessor::isBusesLayoutSupported(const BusesLayout &layouts) co
 }
 
 void WahmbulanceProcessor::processBlock(juce::AudioBuffer<float> &buffer,
-                                    juce::MidiBuffer &midiMessages) {
+                                        juce::MidiBuffer &midiMessages) {
     juce::ignoreUnused(midiMessages);
 
-    juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
-    size_t num_samples = static_cast<size_t>(buffer.getNumSamples());
-    size_t num_channels = static_cast<size_t>(buffer.getNumChannels());
+    size_t total_num_input_channels = (size_t) getTotalNumInputChannels();
+    size_t total_num_output_channels = (size_t) getTotalNumOutputChannels();
+    size_t num_samples = (size_t) buffer.getNumSamples();
+    size_t num_channels = (size_t) buffer.getNumChannels();
+
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
     // This is here to avoid people getting screaming feedback
     // when they first compile a plugin, but obviously you don't need to keep
     // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i) {
-        buffer.clear(i, 0, (int) num_samples);
+    for (size_t i = total_num_input_channels; i < total_num_output_channels; ++i) {
+        buffer.clear((int) i, 0, (int) num_samples);
     }
 
-    float gain_copy = outputGain->get();
-    float filterCutoffHzCopy = filterStartingFreqHz->get();
-    float q_copy = filterResonance->get();
-    auto filter_type_copy = static_cast<VariableFreqBiquadFilter::Type>(filterType->getIndex());
-    auto filterRangeCopy = filterRangeHz->get();
-    auto envelopeSensitivityCopy = envelopeSensitivity->get();
-    auto envelopeAttackMsCopy = envelopeAttackMs->get();
-    auto envelopeReleaseMsCopy = envelopeReleaseMs->get();
-    auto mix_copy = outputMix->get();
+    float output_gain = outputGain->get();
+    float filter_cutoff_hz = filterStartingFreqHz->get();
+    float resonance = filterResonance->get();
+    AdjustableBiquadFilter::Type filter_type = static_cast<AdjustableBiquadFilter::Type>(filterType->getIndex());
+    float filter_range = filterRangeHz->get();
+    float envelope_sensitivity = envelopeSensitivity->get();
+    float envelope_attack_ms = envelopeAttackMs->get();
+    float envelope_release_ms = envelopeReleaseMs->get();
+    float mix_copy = outputMix->get();
 
-    // TODO: replace these fills with the envelope follower
-    std::fill(qs.begin(), qs.end(), q_copy);
+    std::fill(qs.begin(), qs.end(), resonance);
 
     for (size_t channel = 0; channel < num_channels; channel++) {
         float *channelSamples = buffer.getWritePointer((int) channel);
-        signal_copy.assign(channelSamples, channelSamples + num_samples);
+        signal_copy.assign(channelSamples, &channelSamples[num_samples]);
 
         // Run the envelope follower
-        envelope_follower[channel].setAttackTimeConstant(envelopeAttackMsCopy);
-        envelope_follower[channel].setReleaseTimeConstant(envelopeReleaseMsCopy);
+        envelope_follower[channel].setAttackTimeConstant(envelope_attack_ms);
+        envelope_follower[channel].setReleaseTimeConstant(envelope_release_ms);
         envelope_follower[channel].step(num_samples, channelSamples, &envelope_outs[0]);
 
-        // Apply the envelope follower signal to modulate 
+        // Apply the envelope follower signal to modulate
         for (size_t i = 0; i < num_samples; i++) {
-            cutoff_freqs[i] = filterCutoffHzCopy
-                              + envelopeSensitivityCopy * envelope_outs[i] * filterRangeCopy; // Make programmable
-            auto stop_freq = clip<float>(filterCutoffHzCopy + filterRangeCopy, 5, sampleRateHz / 2.0f - .1f);
-            auto min_freq = filterRangeCopy < 0 ? stop_freq : 5;
-            auto max_freq = filterRangeCopy >= 0 ? stop_freq : (sampleRateHz / 2.0f - .1f);
+            cutoff_freqs[i] = filter_cutoff_hz
+                              + envelope_sensitivity * envelope_outs[i] * filter_range; // Make programmable
+            float stop_freq = clip<float>(filter_cutoff_hz + filter_range, 5, sampleRateHz / 2.0f - .1f);
+            float min_freq = filter_range < 0 ? stop_freq : 5;
+            float max_freq = filter_range >= 0 ? stop_freq : (sampleRateHz / 2.0f - .1f);
             cutoff_freqs[i] = clip<float>(cutoff_freqs[i], min_freq, max_freq);
         }
-        filter[channel].setType(filter_type_copy);
+        filter[channel].setType(filter_type);
         filter[channel].step(num_samples, channelSamples, &cutoff_freqs[0], &qs[0], channelSamples);
 
         for (size_t i = 0; i < num_samples; i++) {
-            channelSamples[i] = (mix_copy * channelSamples[i] + (1 - mix_copy) * signal_copy[i]) * gain_copy;
+            channelSamples[i] = (mix_copy * channelSamples[i] + (1 - mix_copy) * signal_copy[i]) * output_gain;
         }
-        cutoff_average_freq = reduce(cutoff_freqs.begin(), cutoff_freqs.end())/ cutoff_freqs.size();
+
+        cutoff_average_freq = reduce(cutoff_freqs.begin(), cutoff_freqs.end()) / cutoff_freqs.size();
     }
 }
 
-float WahmbulanceProcessor::getCutoffAverageFreq( ) { return cutoff_average_freq; }
+float WahmbulanceProcessor::getCutoffAverageFreq() { return cutoff_average_freq; }
 //==============================================================================
 bool WahmbulanceProcessor::hasEditor() const {
     return true; // (change this to false if you choose to not supply an editor)

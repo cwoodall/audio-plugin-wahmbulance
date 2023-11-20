@@ -1,39 +1,40 @@
-#include "VariableFreqBiquadFilter.h"
+#include "adjustable_biquad_filter.h"
+#include "dsp_math.h"
+
+#define _USE_MATH_DEFINES
 #include <cmath>
 
-constexpr float PI = 3.1415926536f;
-
-VariableFreqBiquadFilter::VariableFreqBiquadFilter() {
+AdjustableBiquadFilter::AdjustableBiquadFilter() {
     first_run = true;
 }
 
-void VariableFreqBiquadFilter::setSamplingRate(float sr) {
+void AdjustableBiquadFilter::setSamplingRate(float sr) {
     this->sample_rate = sr;
 }
 
-void VariableFreqBiquadFilter::setCutoffFrequency(float cf) {
+void AdjustableBiquadFilter::setCutoffFrequency(float cf) {
     this->cutoff_freq_Hz = cf;
 }
 
-void VariableFreqBiquadFilter::setQ(float q_) {
+void AdjustableBiquadFilter::setQ(float q_) {
     this->q = q_;
 }
 
-void VariableFreqBiquadFilter::setType(VariableFreqBiquadFilter::Type t) {
+void AdjustableBiquadFilter::setType(AdjustableBiquadFilter::Type t) {
     this->filter_type = t;
 }
 
-void VariableFreqBiquadFilter::step(const size_t n, const float in[], float out[]) {
+void AdjustableBiquadFilter::step(const size_t n, const float in[], float out[]) {
     calculateGains();
     for (size_t i = 0; i < n; i++) {
         singleStep(in[i], &out[i]);
     }
 }
-void VariableFreqBiquadFilter::step(const size_t n,
-                                    const float in[],
-                                    const float cutoff_freqs[],
-                                    const float qs[],
-                                    float out[]) {
+void AdjustableBiquadFilter::step(const size_t n,
+                                  const float in[],
+                                  const float cutoff_freqs[],
+                                  const float qs[],
+                                  float out[]) {
     for (size_t i = 0; i < n; i++) {
         setCutoffFrequency(cutoff_freqs[i]);
         setQ(qs[i]);
@@ -43,7 +44,7 @@ void VariableFreqBiquadFilter::step(const size_t n,
     }
 }
 
-void VariableFreqBiquadFilter::singleStep(const float in, float *out) {
+void AdjustableBiquadFilter::singleStep(const float in, float *out) {
     if (first_run) {
         buffer_z[2] = in;
         buffer_z[1] = in;
@@ -67,13 +68,13 @@ void VariableFreqBiquadFilter::singleStep(const float in, float *out) {
     }
 }
 
-void VariableFreqBiquadFilter::calculateGains() {
+void AdjustableBiquadFilter::calculateGains() {
     float wc = cutoff_freq_Hz / sample_rate;
-    float k = std::tan(static_cast<float>(PI) * wc);
+    float k = std::tan(static_cast<float>(cw::dsp::PI) * wc);
     float norm = 1.f / (1.f + k / this->q + k * k);
 
     switch (filter_type) {
-        case VariableFreqBiquadFilter::Type::LOWPASS: {
+        case AdjustableBiquadFilter::Type::LOWPASS: {
             gains_b[0] = k * k * norm;
             gains_b[1] = 2.f * gains_b[0];
             gains_b[2] = gains_b[0];
@@ -82,7 +83,7 @@ void VariableFreqBiquadFilter::calculateGains() {
             gains_a[2] = (1.f - k / q + k * k) * norm;
             break;
         }
-        case VariableFreqBiquadFilter::Type::BANDPASS: {
+        case AdjustableBiquadFilter::Type::BANDPASS: {
             gains_b[0] = k / q * norm;
             gains_b[1] = 0.0f;
             gains_b[2] = -gains_b[0];
@@ -92,7 +93,7 @@ void VariableFreqBiquadFilter::calculateGains() {
 
             break;
         }
-        case VariableFreqBiquadFilter::Type::HIGHPASS:
+        case AdjustableBiquadFilter::Type::HIGHPASS:
         default: {
             gains_b[0] = norm;
             gains_b[1] = -2.0f * gains_b[0];

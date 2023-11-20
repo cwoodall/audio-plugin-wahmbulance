@@ -1,3 +1,5 @@
+.cache
+pluginval*
 build
 CMakeLists.txt.user
 CMakeCache.txt
@@ -10,6 +12,8 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 **/.DS_Store
+.ruff_cache/*
+.mypy_cache/*
 
 # It's nice to have the Builds folder exist, to remind us where it is
 Builds/*
