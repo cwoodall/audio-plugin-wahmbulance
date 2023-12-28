@@ -102,7 +102,7 @@ jobs:
     - name: Pluginval
       shell: bash
       run: |
-        poetry run invoke pluginval
+        poetry run invoke pluginval --build-dir ${{ env.BUILD_DIR }}
 
     - name: Add Custom Icons (macOS)
       if: ${{ matrix.name == 'macOS' }}

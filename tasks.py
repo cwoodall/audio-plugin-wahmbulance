@@ -32,31 +32,31 @@ def __bootstrap_windows(c):
 
 
 @task
-def pluginval(c):
+def pluginval(c, build_dir="build"):
     pluginval_bin_name = {
         "macOS": "pluginval.app/Contents/MacOS/pluginval",
         "Linux": "pluginval",
         "Windows": "pluginval.exe",
     }
 
-    os.makedirs("build", exist_ok=True)
-    with c.cd("build"):
+    os.makedirs(build_dir, exist_ok=True)
+    with c.cd(build_dir):
         c.run(
             f'curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.3/pluginval_{os_name}.zip"'
         )
 
     pwd = os.getcwd()
-    os.chdir("build")
+    os.chdir(build_dir)
     with zipfile.ZipFile(
         f"pluginval_{ os_name }.zip",
         "r",
     ) as zip_ref:
         zip_ref.extractall(pwd="build")
     os.chdir(pwd)
-    os.chmod(f"build/{pluginval_bin_name[os_name]}", 0o777)
+    os.chmod(f"{build_dir}/{pluginval_bin_name[os_name]}", 0o777)
 
     c.run(
-        f'build/{pluginval_bin_name[os_name]} --strictness-level 10 --verbose --validate "build/Wahmbulance_artefacts/Release/VST3"'
+        f'{build_dir}/{pluginval_bin_name[os_name]} --strictness-level 10 --verbose --validate "{build_dir}/Wahmbulance_artefacts/Release/VST3"'
     )
 
 
