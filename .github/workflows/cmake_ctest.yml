@@ -12,10 +12,9 @@ concurrency:
 env:
   PROJECT_NAME: Wahmbulance
   BUILD_TYPE: Release
-  BUILD_DIR: Builds
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   DISPLAY: :0 # linux pluginval needs this
-  CMAKE_BUILD_PARALLEL_LEVEL: 3 # Use up to 3 cpus to build juceaide, etc
+  CMAKE_BUILD_PARALLEL_LEVEL: 4 # Use up to 3 cpus to build juceaide, etc
   HOMEBREW_NO_INSTALL_CLEANUP: 1
 
 # jobs are run in paralell on different machines
@@ -80,7 +79,7 @@ jobs:
       shell: bash
       run: |
         VERSION=$(cat VERSION)
-        echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
+        echo "ARTIFACTS_PATH=build/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
         echo "VST3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3" >> $GITHUB_ENV
         echo "AU_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.PROJECT_NAME }}.component" >> $GITHUB_ENV
         echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PROJECT_NAME }}.appex" >> $GITHUB_ENV
@@ -93,20 +92,20 @@ jobs:
 
     - name: Build
       shell: bash
-      run: poetry run invoke build -j4 --build-type ${{ env.BUILD_TYPE }} --build-dir ${{ env.BUILD_DIR }}
+      run: poetry run invoke build -j4 --build-type ${{ env.BUILD_TYPE }}
 
     - name: Test
       shell: bash
-      run: poetry run invoke test --build-dir ${{ env.BUILD_DIR }}
+      run: poetry run invoke test
 
     - name: Pluginval
       shell: bash
       run: |
-        poetry run invoke pluginval --build-dir ${{ env.BUILD_DIR }}
+        poetry run invoke pluginval
 
     - name: Add Custom Icons (macOS)
       if: ${{ matrix.name == 'macOS' }}
-      working-directory: ${{ env.BUILD_DIR }}
+      working-directory: build
       run: |
         # add the icns as its own icon resource (meta!)
         sips -i ../packaging/wahmbulance.icns

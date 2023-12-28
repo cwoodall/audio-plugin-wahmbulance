@@ -35,7 +35,7 @@ def __bootstrap_windows(c):
 def pluginval(c, build_dir="build"):
     pluginval_bin_name = {
         "macOS": "pluginval.app/Contents/MacOS/pluginval",
-        "Linux": "pluginval",
+        "Linux": "./pluginval",
         "Windows": "pluginval.exe",
     }
 
@@ -52,12 +52,12 @@ def pluginval(c, build_dir="build"):
         "r",
     ) as zip_ref:
         zip_ref.extractall(pwd="build")
-    os.chdir(pwd)
-    os.chmod(f"{build_dir}/{pluginval_bin_name[os_name]}", 0o777)
-
+    os.chmod(f"{pluginval_bin_name[os_name]}", 0o777)
     c.run(
-        f'{build_dir}/{pluginval_bin_name[os_name]} --strictness-level 10 --verbose --validate "{build_dir}/Wahmbulance_artefacts/Release/VST3"'
+        f'{pluginval_bin_name[os_name]} --strictness-level 10 --verbose --validate "Wahmbulance_artefacts/Release/VST3"'
     )
+
+    os.chdir(pwd)
 
 
 @task
