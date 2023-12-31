@@ -15,6 +15,8 @@ _deps
 .ruff_cache/*
 .mypy_cache/*
 
+packaging/dmg
+Wahmbulance*.dmg
 # It's nice to have the Builds folder exist, to remind us where it is
 Builds/*
 !Builds/.gitkeep

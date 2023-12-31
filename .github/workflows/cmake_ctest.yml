@@ -81,8 +81,6 @@ jobs:
         VERSION=$(cat VERSION)
         echo "ARTIFACTS_PATH=build/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
         echo "VST3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3" >> $GITHUB_ENV
-        echo "AU_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.PROJECT_NAME }}.component" >> $GITHUB_ENV
-        echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PROJECT_NAME }}.appex" >> $GITHUB_ENV
         echo "PRODUCT_NAME=${{ env.PROJECT_NAME }}-$VERSION-${{ matrix.name }}" >> $GITHUB_ENV
 
     - name: ccache
@@ -103,61 +101,16 @@ jobs:
       run: |
         poetry run invoke pluginval
 
-    - name: Add Custom Icons (macOS)
-      if: ${{ matrix.name == 'macOS' }}
-      working-directory: build
-      run: |
-        # add the icns as its own icon resource (meta!)
-        sips -i ../packaging/wahmbulance.icns
-
-        # Grab the resource, put in tempfile
-        DeRez -only icns ../packaging/wahmbulance.icns > /tmp/icons
-
-        # Stuff the resource into the strange Icon? file's resource fork
-        Rez -a /tmp/icons -o ${{ env.VST3_PATH }}/Icon$'\r'
-
-        # Set custom icon attribute
-        SetFile -a C ${{ env.VST3_PATH }}
-
-    - name: Create DMG, Notarize and Staple (macOS)
-      if: ${{ matrix.name == 'macOS' }}
-      run: |
-        npm install -g appdmg
-        mkdir -p packaging/dmg
-
-        # Create directories for the dmg symlinks
-        sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/VST3
-        ln -s /Library/Audio/Plug-Ins/Components "packaging/dmg/Your Mac's Component folder"
-        ln -s /Library/Audio/Plug-Ins/VST3 "packaging/dmg/Your Mac's VST3 folder"
-        mv "${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3" packaging/dmg
-        # mv "${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component" packaging/dmg
-
-        # Run appdmg to create the .dmg
-        cd packaging && appdmg dmg.json ${{ env.PRODUCT_NAME}}.dmg
-        # codesign -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" --timestamp -i com.cwoodall.wahmbulance --force ${{ env.PRODUCT_NAME }}.dmg
-        # xcrun notarytool submit ${{ env.PRODUCT_NAME }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
-        # xcrun stapler staple ${{ env.PRODUCT_NAME }}.dmg
-
-    - name: Zip
-      if: ${{ matrix.name == 'Linux' }}
-      working-directory: ${{ env.ARTIFACTS_PATH }}
-      run: 7z a -tzip ${{ env.PRODUCT_NAME }}.zip .
-
-    - name: Generate Installer and Sign with EV cert on Azure (Windows)
-      if: ${{ matrix.name == 'Windows' }}
+    - name: Package
       shell: bash
       run: |
-        iscc "packaging\installer.iss"
-        mv "packaging/Output/${{ env.PRODUCT_NAME }}.exe" "${{ env.ARTIFACTS_PATH }}/"
-        # dotnet tool install --global AzureSignTool
-        # AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "${{ env.ARTIFACTS_PATH }}/${{ env.PRODUCT_NAME }}.exe"
+        poetry run invoke package --build-type ${{ env.BUILD_TYPE }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PRODUCT_NAME }}.${{ matrix.extension }}
         path: packaging/${{ env.PRODUCT_NAME }}.${{ matrix.extension }}
-
 
   release:
     if: contains(github.ref, 'tags/v')

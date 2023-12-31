@@ -2,9 +2,17 @@ from invoke import task
 import platform
 import zipfile
 import os
+import shutil
+
+project_name = "Wahmbulance"
+with open("VERSION", "r") as f:
+    project_version = f.read().strip()
 
 if platform.system() == "Darwin":
+    import dmgbuild
+
     os_name = "macOS"
+
 elif platform.system() == "Linux":
     os_name = "Linux"
 elif platform.system() == "Windows":
@@ -100,3 +108,41 @@ def test(
 ):
     with c.cd(build_dir):
         c.run(f"ctest --output-on-failure -j{j}")
+
+
+@task
+def package(
+    c,
+    build_dir="build",
+    build_type="Release",
+):
+    product_name = f"{project_name}-{project_version}-{os_name}"
+    artifacts_dir = f"{build_dir}/{project_name}_artefacts/{build_type}"
+    vst3_path = f"{artifacts_dir}/VST3/{project_name}.vst3"
+
+    def package_macos(_):
+        # TODO #2 - Figure out how to add the icon to the vst3 again.
+        dmgbuild.build_dmg(
+            filename=f"{build_dir}/{project_name}-{project_version}-{os_name}.dmg",
+            volume_name=project_name,
+            settings_file="packaging/dmg.py",
+            defines={
+                "app": vst3_path,
+                "icon": "packaging/wahmbulance.icns",
+            },
+        )
+
+    def package_linux(_):
+        shutil.make_archive(f"{build_dir}/{product_name}", "zip", f"{vst3_path}")
+
+    def package_windows(c):
+        c.run('iscc "packaging\installer.iss"')
+        c.run(f'mv "packaging/Output/{product_name}.exe" "{build_dir}"')
+
+    package_map = {
+        "macOS": package_macos,
+        "Linux": package_linux,
+        "Windows": package_windows,
+    }
+
+    package_map[os_name](c)
