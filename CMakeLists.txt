@@ -93,12 +93,8 @@ target_include_directories(cmp_plot SYSTEM INTERFACE ${_inc})
 add_library(juce_lib STATIC)
 target_link_libraries(
   juce_lib
-  PUBLIC juce::juce_core
-         juce::juce_gui_extra
-         juce::juce_dsp
-         juce::juce_audio_utils
-         juce::juce_recommended_config_flags
-         juce::juce_recommended_lto_flags
+  PUBLIC juce::juce_core juce::juce_audio_utils juce::juce_audio_devices
+         juce::juce_recommended_config_flags juce::juce_recommended_lto_flags
          juce::juce_recommended_warning_flags)
 
 target_compile_definitions(
