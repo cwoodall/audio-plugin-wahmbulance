@@ -12,7 +12,6 @@ if platform.system() == "Darwin":
     import dmgbuild
 
     os_name = "macOS"
-
 elif platform.system() == "Linux":
     os_name = "Linux"
 elif platform.system() == "Windows":
@@ -82,20 +81,15 @@ def bootstrap(c):
 def build(
     c,
     cxx_flags="-std=c++20 -stdlib=libc++",
-    j=12,
+    j=3,
     build_type="Release",
     build_dir="build",
 ):
     # c refers to the terminal "context"
     print("building...")
     os.environ["CXXFLAGS"] = cxx_flags
-    c.run(
-        f"cmake -B {build_dir} -G Ninja "
-        + f"-DCMAKE_BUILD_TYPE={build_type} "
-        + "-DCMAKE_C_COMPILER_LAUNCHER=ccache "
-        + "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache "
-        + '-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .'
-    )
+    c.run(f"cmake -B {build_dir} -G Ninja " + f"-DCMAKE_BUILD_TYPE={build_type} ")
+    print(j)
     c.run(f"cmake --build {build_dir} --config {build_type} --parallel {j}")
     print("Success!")
 
