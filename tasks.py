@@ -29,7 +29,7 @@ def __bootstrap_macos(c):
 def __bootstrap_linux(c):
     c.sudo("apt-get update")
     c.sudo(
-        "apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev xvfb fluxbox ninja-build libc++-dev libc++abi-dev libcurl4-openssl-dev"
+        "apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev xvfb fluxbox ninja-build libc++-dev libc++abi-dev libcurl4-openssl-dev install libgtk2.0-dev"
     )
 
 
