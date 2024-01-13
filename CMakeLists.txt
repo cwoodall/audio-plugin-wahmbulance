@@ -40,7 +40,7 @@ file(STRINGS VERSION CURRENT_VERSION)
 project(
   ${PLUGIN_PROJECT_NAME}
   VERSION ${CURRENT_VERSION}
-  LANGUAGES CXX C ASM OBJC)
+  LANGUAGES CXX C ASM)
 
 # Enable to build universal binaries on macOS, increasing build time This only
 # affects local builds, GitHub actions always builds Universals
