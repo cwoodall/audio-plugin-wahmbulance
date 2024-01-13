@@ -9,14 +9,16 @@ endif(CCACHE_FOUND)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 
 # On linux systems using clang, we need to link against libstdc++ explicitly
 # https://cmake.org/pipermail/cmake/2006-January/008136.html
 # http://www.reddit.com/r/cpp/comments/d1op8u/handling_libc_and_libstdc_in_cmake
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -stdlib=libc++ "
-                    " -Wno-error=unused-command-line-argument")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi "
-                           " -Wno-error=unused-command-line-argument")
+if(UNIX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+  set(CMAKE_EXE_LINKER_FLAGS
+      "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
+endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
