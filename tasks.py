@@ -12,7 +12,6 @@ if platform.system() == "Darwin":
     import dmgbuild
 
     os_name = "macOS"
-
 elif platform.system() == "Linux":
     os_name = "Linux"
 elif platform.system() == "Windows":
@@ -28,9 +27,9 @@ def __bootstrap_macos(c):
 
 @task
 def __bootstrap_linux(c):
-    c.sudo("apt-get update")
+    c.sudo("apt update")
     c.sudo(
-        "apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev xvfb fluxbox ninja-build libc++-dev libc++abi-dev libcurl4-openssl-dev"
+        "apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev xvfb fluxbox ninja-build libc++-dev libc++abi-dev libcurl4-openssl-dev libgtk-3-dev"
     )
 
 
@@ -82,20 +81,15 @@ def bootstrap(c):
 def build(
     c,
     cxx_flags="-std=c++20 -stdlib=libc++",
-    j=12,
+    j=3,
     build_type="Release",
     build_dir="build",
 ):
     # c refers to the terminal "context"
     print("building...")
     os.environ["CXXFLAGS"] = cxx_flags
-    c.run(
-        f"cmake -B {build_dir} -G Ninja "
-        + f"-DCMAKE_BUILD_TYPE={build_type} "
-        + "-DCMAKE_C_COMPILER_LAUNCHER=ccache "
-        + "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache "
-        + '-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .'
-    )
+    c.run(f"cmake -B {build_dir} -G Ninja " + f"-DCMAKE_BUILD_TYPE={build_type} ")
+    print(j)
     c.run(f"cmake --build {build_dir} --config {build_type} --parallel {j}")
     print("Success!")
 
